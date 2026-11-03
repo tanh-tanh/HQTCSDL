@@ -1,0 +1,30 @@
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.33\textwidth}>{\raggedright\arraybackslash}p{0.6\textwidth}}
+\caption{Các ràng buộc CHECK}\label{tab:checks}\\
+\toprule \textbf{Tên} & \textbf{Điều kiện} \\ \midrule \endfirsthead
+\toprule \textbf{Tên} & \textbf{Điều kiện} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{CK\_asr\_segments\_span} & \texttt{[start\_sec]>=(0) AND [end\_sec]>=[start\_sec]} \\
+\texttt{CK\_asr\_segments\_text} & \texttt{len([asr\_text])>(0)} \\
+\texttt{CK\_collections\_access} & \texttt{[access\_level]='restricted' OR [access\_level]='open'} \\
+\texttt{CK\_eval\_requests\_latency} & \texttt{[latency\_ms]>=(0)} \\
+\texttt{CK\_eval\_results\_rank} & \texttt{[rank\_no]>(0)} \\
+\texttt{CK\_eval\_runs\_values} & \texttt{[top\_k]>(0) AND [tolerance\_sec]>=(0)} \\
+\texttt{CK\_ground\_truth\_span} & \texttt{[start\_sec]>=(0) AND [end\_sec]>=[start\_sec]} \\
+\texttt{CK\_keyframes\_values} & \texttt{[pts\_time]>=(0) AND [frame\_idx]>=(0) AND [sample\_n]>(0)} \\
+\texttt{CK\_ocr\_texts\_text} & \texttt{len([ocr\_text])>(0)} \\
+\texttt{CK\_organizations\_type} & \texttt{[org\_type]='museum' OR [org\_type]='school' OR [org\_type]='press' OR [org\_type]='tv' OR [org\_type]='library'} \\
+\texttt{CK\_requests\_origin} & \texttt{[origin]='user' OR [origin]='sample'} \\
+\texttt{CK\_requests\_purpose} & \texttt{[purpose]='exhibition' OR [purpose]='education' OR [purpose]='research' OR [purpose]='broadcast'} \\
+\texttt{CK\_requests\_status} & \texttt{[status]='rejected' OR [status]='approved' OR [status]='pending'} \\
+\texttt{CK\_requests\_text} & \texttt{len([request\_text])>(0)} \\
+\texttt{CK\_search\_log\_values} & \texttt{[top\_k]>(0) AND [result\_count]>=(0) AND [latency\_ms]>=(0)} \\
+\texttt{CK\_sessions\_expiry} & \texttt{[expires\_at]>[created\_at]} \\
+\texttt{CK\_terms\_length} & \texttt{len([term])>=(2)} \\
+\texttt{CK\_topics\_parent} & \texttt{[parent\_topic\_id] IS NULL OR [parent\_topic\_id]<>[topic\_id]} \\
+\texttt{CK\_usage\_licenses\_period} & \texttt{[valid\_to]>[valid\_from]} \\
+\texttt{CK\_users\_type} & \texttt{[user\_type]='other' OR [user\_type]='student' OR [user\_type]='researcher' OR [user\_type]='journalist' OR [user\_type]='staff'} \\
+\texttt{CK\_users\_username} & \texttt{len([username])>=(3) AND len([username])<=(32) AND NOT ([username]) collate Latin1\_General\_100\_BIN2 like '\%[\textasciicircum{}a-z0-9\_.-]\%'} \\
+\texttt{CK\_videos\_fps} & \texttt{[fps] IS NULL OR [fps]>(0)} \\
+\texttt{CK\_videos\_id} & \texttt{[video\_id] like 'L[0-9][0-9][\_]V[0-9][0-9][0-9]'} \\
+\texttt{CK\_videos\_title} & \texttt{len([title])>(0)} \\
+\end{longtable}

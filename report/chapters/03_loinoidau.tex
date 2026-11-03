@@ -1,0 +1,37 @@
+\clearpage\chapter*{LỜI NÓI ĐẦU}
+\addcontentsline{toc}{chapter}{LỜI NÓI ĐẦU}
+
+Đài truyền hình, toà báo, trường đại học và bảo tàng đều đang giữ những kho video lớn,
+nhưng mỗi kho nằm riêng ở một đơn vị và gần như chỉ được ghi tên chương trình, ngày phát hành.
+Một nhà báo, nhà nghiên cứu hay sinh viên cần một đoạn tư liệu cũ, như một khoảnh khắc trên
+đường đua, một dòng chữ trên bảng điểm hay một câu bình luận, thường không biết nó nằm ở đâu,
+và khi tìm ra thì còn phải xin phép đơn vị giữ bản quyền. Một thư viện số dùng chung giải
+quyết cả hai việc. Nó cần một cơ sở dữ liệu lưu được danh mục của nhiều đơn vị cùng hàng
+nghìn khung hình kèm văn bản trích từ hình và lời nói, quản lý yêu cầu khai thác và giấy phép
+sử dụng, tài khoản của nhiều loại người dùng và nhật ký thao tác. Đồng thời nó phải bảo đảm
+tính toàn vẹn và phân quyền.
+
+Báo cáo này trình bày việc thiết kế và triển khai cơ sở dữ liệu cho một hệ thống như vậy trên
+Microsoft SQL Server (bản Express), theo một tình huống giả định: \textit{thư viện số tư
+liệu nghe nhìn} dùng chung cho nhiều đơn vị. Toàn bộ dữ liệu, chỉ mục văn bản, việc gộp kết
+quả tìm kiếm, quy trình yêu cầu khai thác và cấp phép, tài khoản và phân quyền được hiện thực
+bằng T-SQL: bảng có đầy đủ ràng buộc được đặt tên, hàm, thủ tục lưu trữ, view, trigger và phân
+quyền mức cơ sở dữ liệu. Một ứng dụng web nhỏ dùng chính cơ sở dữ liệu này để bạn đọc tra cứu
+và gửi yêu cầu, còn cán bộ thư viện chọn đoạn tư liệu và cấp phép. Video mẫu là 25 đoạn tường
+thuật giải đua xe đạp tiếng Việt lấy từ một bộ dữ liệu video công khai; danh mục các đơn vị
+và giấy phép quanh đó là dữ liệu minh hoạ.
+
+Nội dung báo cáo gồm ba chương. Chương 1 khảo sát bài toán và phân tích yêu cầu. Chương 2
+trình bày thiết kế cơ sở dữ liệu: thực thể, sơ đồ ERD, quá trình chuẩn hoá đến dạng chuẩn 3,
+dư thừa có kiểm soát, danh sách bảng và ràng buộc. Chương 3 trình bày cài đặt các đối tượng T-SQL, các truy vấn
+nghiệp vụ, kiểm thử, ứng dụng minh hoạ và kết quả đo chất lượng tìm kiếm.
+
+Do thời gian và kiến thức còn hạn chế, báo cáo khó tránh khỏi thiếu sót. Nhóm rất mong
+nhận được góp ý của thầy/cô để đề tài được hoàn thiện hơn.
+\\
+\vfill
+
+\begin{flushright}
+\textit{Hà Nội, năm 2026}\\
+\textbf{Nhóm sinh viên thực hiện}
+\end{flushright}

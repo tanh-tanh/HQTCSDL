@@ -1,0 +1,45 @@
+# Secrets / local env
+.env
+.env.*
+!.env.example
+
+# Python env / caches
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# Large local data and models (never commit).  `data/*` rather than `data/`
+# so the keyframe map below can be un-ignored.
+data/*
+!data/map-keyframes/
+models/
+*.zip
+
+# Editor / agent local state
+.claude/
+.codex/
+.idea/
+.vscode/
+*.swp
+*~
+
+# Reference report template supplied by the user (another group's report): never commit.
+template/
+
+# LaTeX build artifacts (the PDF itself is committed).
+report/*.aux
+report/*.bbl
+report/*.bcf
+report/*.blg
+report/*.fdb_latexmk
+report/*.fls
+report/*.lof
+report/*.log
+report/*.lot
+report/*.out
+report/*.run.xml
+report/*.toc

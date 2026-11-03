@@ -1,0 +1,103 @@
+\documentclass[a4paper,oneside]{report}
+
+\input{premable}
+
+% ------------------------------------------
+% Bổ sung cho báo cáo này
+% ------------------------------------------
+\usepackage{fancyvrb}
+\usetikzlibrary{shapes.multipart,positioning,arrows.meta,calc}
+\graphicspath{{figures/images/}}
+
+% Đoạn mã SQL (chỉ chứa ký tự ASCII: listings không xử lý được UTF-8 nhiều byte).
+\lstdefinelanguage{TSQL}[]{SQL}{
+    morekeywords={GO,TOP,PERCENT,OUTPUT,THROW,TRY,CATCH,TRANSACTION,ROLLBACK,COMMIT,
+        EXECUTE,EXEC,REVERT,NOCOUNT,PERSISTED,SCHEMABINDING,RETURNS,RETURN,CROSS,APPLY,
+        OPENJSON,STRING_AGG,STRING_SPLIT,TRANSLATE,WITHIN,OVER,PARTITION,ROW_NUMBER,RANK,
+        MERGE,IDENTITY,NVARCHAR,VARCHAR,DECIMAL,DATETIME2,BIT,TINYINT,SMALLINT,BIGINT,
+        INTERSECT,EXCEPT,FULL,OUTER,RIGHT,LEFT,COLLATE,SESSION_CONTEXT,IF,ELSE,BEGIN,END,
+        DECLARE,SET,PROCEDURE,FUNCTION,TRIGGER,VIEW,AFTER,ROLE,USER,LOGIN,WITHOUT,REVERT,
+        CHECK,OPTION,CONSTRAINT,REFERENCES,CASCADE,DEFAULT,UNIQUE,PRIMARY,FOREIGN,KEY,
+        SCOPE_IDENTITY,XACT_ABORT,COALESCE,LOG,CONCAT,CAST}
+}
+\lstset{style=codestyle, language=TSQL, basicstyle=\ttfamily\footnotesize}
+
+% Thực thể trong sơ đồ ERD: tên ở phần trên, thuộc tính ở phần dưới.
+\tikzset{
+    entity/.style={rectangle split, rectangle split parts=2, draw=blue!60!black, thick,
+        rounded corners=2pt, rectangle split part fill={blue!12, white},
+        font=\scriptsize, align=left, inner sep=3pt},
+    refentity/.style={entity, draw=gray, dashed, rectangle split part fill={gray!15, white}},
+    rel/.style={draw=black!70, thick},
+    card/.style={font=\scriptsize\bfseries, fill=white, inner sep=1pt},
+}
+\newcommand{\pk}[1]{\underline{#1}}
+\newcommand{\attrs}[1]{\begin{tabular}{@{}l@{}}#1\end{tabular}}
+
+\begin{document}
+% Cho phép xuống dòng sau dấu _ trong tên bảng/cột, và giãn khoảng trắng
+% thay vì để chữ tràn lề.
+\DeclareRobustCommand{\_}{\textunderscore\allowbreak}
+\sloppy
+
+% ------------------------------------------
+% PHẦN TRƯỚC NỘI DUNG
+% ------------------------------------------
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\input{chapters/00_bia}
+
+\input{chapters/05_nhanxet}
+\newpage
+
+\input{chapters/03_loinoidau}
+\newpage
+
+\input{chapters/04_loicamon}
+\newpage
+
+\input{chapters/14_danhmuctuviettat}
+\newpage
+
+\input{chapters/15_danhmucthuatngu}
+\newpage
+
+\tableofcontents
+\newpage
+
+\listoffigures
+\addcontentsline{toc}{chapter}{\listfigurename}
+\newpage
+
+\listoftables
+\addcontentsline{toc}{chapter}{\listtablename}
+\newpage
+
+% ------------------------------------------
+% PHẦN NỘI DUNG CHÍNH
+% ------------------------------------------
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{chapters/06_chuong1}
+\newpage
+
+\input{chapters/07_chuong2}
+\newpage
+
+\input{chapters/08_chuong3}
+\newpage
+
+\input{chapters/10_ketluan}
+\newpage
+
+\input{chapters/12_phuluc}
+\newpage
+
+\printbibliography[
+    heading=bibintoc,
+    title={TÀI LIỆU THAM KHẢO}
+]
+
+\end{document}

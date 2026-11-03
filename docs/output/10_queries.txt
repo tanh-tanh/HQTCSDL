@@ -1,0 +1,328 @@
+﻿Q1. Video của lô L23
+video_id|batch|collection_id|title|fps
+--------|-----|-------------|-----|---
+L23_V001|L23|1|Tường thuật đua xe đạp, đoạn 01|25.000
+L23_V002|L23|1|Tường thuật đua xe đạp, đoạn 02|25.000
+L23_V003|L23|1|Tường thuật đua xe đạp, đoạn 03|25.000
+L23_V004|L23|1|Tường thuật đua xe đạp, đoạn 04|25.000
+L23_V005|L23|1|Tường thuật đua xe đạp, đoạn 05|25.000
+L23_V006|L23|1|Tường thuật đua xe đạp, đoạn 06|25.000
+L23_V007|L23|1|Tường thuật đua xe đạp, đoạn 07|25.000
+L23_V008|L23|1|Tường thuật đua xe đạp, đoạn 08|25.000
+L23_V009|L23|1|Tường thuật đua xe đạp, đoạn 09|25.000
+L23_V010|L23|1|Tường thuật đua xe đạp, đoạn 10|25.000
+L23_V011|L23|1|Tường thuật đua xe đạp, đoạn 11|25.000
+L23_V012|L23|1|Tường thuật đua xe đạp, đoạn 12|25.000
+L23_V013|L23|1|Tường thuật đua xe đạp, đoạn 13|25.000
+L23_V014|L23|1|Tường thuật đua xe đạp, đoạn 14|25.000
+L23_V015|L23|1|Tường thuật đua xe đạp, đoạn 15|25.000
+L23_V016|L23|1|Tường thuật đua xe đạp, đoạn 16|25.000
+L23_V017|L23|1|Tường thuật đua xe đạp, đoạn 17|25.000
+L23_V018|L23|1|Tường thuật đua xe đạp, đoạn 18|25.000
+L23_V019|L23|1|Tường thuật đua xe đạp, đoạn 19|25.000
+L23_V020|L23|1|Tường thuật đua xe đạp, đoạn 20|25.000
+L23_V021|L23|1|Tường thuật đua xe đạp, đoạn 21|25.000
+L23_V022|L23|1|Tường thuật đua xe đạp, đoạn 22|25.000
+L23_V023|L23|1|Tường thuật đua xe đạp, đoạn 23|25.000
+L23_V024|L23|1|Tường thuật đua xe đạp, đoạn 24|25.000
+L23_V025|L23|1|Tường thuật đua xe đạp, đoạn 25|25.000
+Q2. Video có hơn 300 khung hình và tỉ lệ khung hình có chữ
+video_id|keyframes|ocr_frames|ocr_percent
+--------|---------|----------|-----------
+L23_V025|539|305|56.6
+L23_V021|345|165|47.8
+L23_V019|315|253|80.3
+Q3. Video có hơn 50% khung hình không có chữ
+video_id|keyframes|frames_without_text
+--------|---------|-------------------
+L23_V021|345|180
+L23_V007|256|174
+L23_V023|234|154
+Q4. Yêu cầu đã và chưa có đoạn tư liệu được chọn
+origin|with_selection|without_selection
+------|--------------|-----------------
+sample|60|60
+Q5. Đối chiếu đoạn đã chọn với vị trí đã xác minh (lệch tối đa 3 giây)
+status|requests
+------|--------
+Chọn đúng đoạn|60
+Đã xác minh, chưa chọn đoạn|60
+Q6. Video dài hơn trung bình
+video_id|last_keyframe_sec|above_average_sec
+--------|-----------------|-----------------
+L23_V025|859.560|471.2
+L23_V021|543.760|155.4
+L23_V019|540.640|152.3
+L23_V018|507.320|119.0
+L23_V002|434.880|46.6
+L23_V012|416.400|28.1
+L23_V011|404.320|16.0
+L23_V024|398.880|10.6
+L23_V004|396.640|8.3
+L23_V023|394.760|6.4
+L23_V007|394.160|5.8
+Q7. Người có quyền chọn đoạn tư liệu
+username|full_name|selections
+--------|---------|----------
+admin|Quản trị thư viện số|0
+thuthu1|Cán bộ thư viện 1|60
+Q8. Chữ và lời nói của L23_V001 trong 30 giây đầu
+kind|at_sec|text
+----|------|----
+ASR|.070|CẬU
+OCR|.520|01:01:36
+ASR|1.574|VỊ TRÍ TỐT NHẤT ĐỂ CHANH NƯỚC RÚT TẠI Ở VÒNG ĐUA THỨ MƯỜI LĂM
+OCR|1.720|01:01:37
+OCR|2.920|01:01:39
+OCR|3.840|01:01:39
+OCR|4.680|01:01:40 VÔNG 4/15 01:01:40 VONG 4/15
+OCR|5.560|01:01:41 VÔNG 14/15 01:01:41 VONG 14/15
+OCR|6.400|01:01:42
+OCR|7.400|01:01:43 VÒNG14/15 01:01:43 VONG14/15
+OCR|8.400|01:01:44 VÒNG14/15 01:01:44 VONG14/15
+ASR|8.710|CHÚNG TA ĐANG THẤY ĐÂY LÀ CÁI RÙA CỦA ĐOÀN ĐÔNG HỌ CŨNG BÁO HIỆU CHO CÁC VẬN ĐỘNG VIÊN BIẾT
+OCR|9.320|01:01:45 VÔNG 14/15 01:01:45 VONG 14/15
+OCR|10.320|01:01:46 VÔNG 14/15 01:01:46 VONG 14/15
+OCR|11.280|CHẶNG 1 01:01:47 VÔNG 14/15 CHANG 1 01:01:47 VONG 14/15
+OCR|11.880|ĐONGA 01:05:24 DONGA 01:05:24
+OCR|12.520|01:05:24
+ASR|13.830|HỌ CHUẨN BỊ BƯỚC VÀO VÒNG CHẠY CUỐI CÙNG CỦA CHẶNG ĐUA NGÀY HÔM NAY
+OCR|14.520|01:05:26
+OCR|16.520|01:05:28
+OCR|18.520|01:05:30
+OCR|20.520|01:05:32
+OCR|22.520|01:05:34
+OCR|24.520|01:05:36
+ASR|24.710|TÔI THẤY BA VẬN ĐỘNG VIÊN VẪN ĐANG RẤT QUYẾT TÂM TRÊN MÀN ẢNH CỦA CÁC BẠN ĐÓ LÀ VẬN ĐỘNG VIÊN ROMAN MAIL
+OCR|26.520|01:05:38
+OCR|28.000|01:05:40
+OCR|28.520|01:05:40 05 24 17.802 68.293
+Q9. Từ khoá có ở cả OCR và ASR
+term|ocr_frames|asr_segments
+----|----------|------------
+chang|237|100
+da|6|323
+tay|1|313
+minh|64|245
+ho|72|183
+thanh|79|172
+do|4|236
+chi|78|159
+dong|25|211
+dich|123|92
+pho|79|115
+ngay|10|153
+vi|1|162
+nam|17|142
+nuoc|2|145
+Q10. Video có yêu cầu đã xác minh nhưng chưa có đoạn được chọn
+video_id
+--------
+L23_V023
+L23_V025
+Q11. Khung hình có chữ "ho chi minh"
+video_id|pts_time|ocr_text
+--------|--------|--------
+L23_V009|310.600|CUPTRUYEN HHHH HỒ CHÍ MINH TRUYỀN ĐÀI THÀNH PHỐ HÌNH HIỆN TRỰC CUPTRUYEN HHHH HO CHI MINH TRUYEN DAI THANH PHO HINH HIEN TRUC
+L23_V010|308.760|CUPTRUYEN NHHHH HỒ CHÍ MINH PHỐ TRUYỀN THÀNH HÌNH ĐÀI HIỆN TRỰC CUPTRUYEN NHHHH HO CHI MINH PHO TRUYEN THANH HINH DAI HIEN TRUC
+L23_V010|310.080|CUPTRUYENHHNHHH HỒ PHỐ CHÍ MINH ĐÀI HÌNH THÀNH TRUYỀN HIỆN THỰC CUPTRUYENHHNHHH HO PHO CHI MINH DAI HINH THANH TRUYEN HIEN THUC
+Q12. 1% khung hình nhiều từ khoá OCR nhất
+keyframe_id|video_id|pts_time|distinct_terms
+-----------|--------|--------|--------------
+65771|L23_V002|434.880|11
+66215|L23_V004|394.000|11
+66366|L23_V005|239.440|11
+66367|L23_V005|240.760|11
+66368|L23_V005|242.080|11
+66584|L23_V006|355.120|11
+66839|L23_V007|391.520|11
+66841|L23_V007|394.160|11
+66981|L23_V008|244.720|11
+67157|L23_V009|310.600|11
+67350|L23_V010|308.760|11
+67352|L23_V010|311.400|11
+67842|L23_V012|413.760|11
+67843|L23_V012|415.080|11
+67844|L23_V012|416.400|11
+68059|L23_V013|368.200|11
+68060|L23_V013|369.520|11
+68061|L23_V013|370.840|11
+68671|L23_V016|334.440|11
+68672|L23_V016|335.760|11
+68874|L23_V017|314.640|11
+69168|L23_V018|504.680|11
+69169|L23_V018|506.000|11
+69731|L23_V020|383.320|11
+69732|L23_V020|384.640|11
+70077|L23_V021|543.760|11
+70758|L23_V024|396.160|11
+70759|L23_V024|397.520|11
+71297|L23_V025|856.920|11
+65769|L23_V002|432.240|10
+65770|L23_V002|433.560|10
+65967|L23_V003|307.080|10
+65968|L23_V003|308.400|10
+65969|L23_V003|309.720|10
+66583|L23_V006|353.800|10
+66585|L23_V006|356.440|10
+66840|L23_V007|392.840|10
+67158|L23_V009|311.920|10
+67159|L23_V009|313.240|10
+67351|L23_V010|310.080|10
+Q13. Xếp hạng video theo mật độ lời nói
+rank_no|video_id|asr_segments|last_keyframe_sec|segments_per_minute
+-------|--------|------------|-----------------|-------------------
+1|L23_V001|30|175.800|10.24
+2|L23_V012|64|416.400|9.22
+3|L23_V009|47|313.240|9.00
+4|L23_V007|59|394.160|8.98
+5|L23_V014|47|319.520|8.83
+6|L23_V004|58|396.640|8.77
+7|L23_V018|74|507.320|8.75
+8|L23_V015|52|369.560|8.44
+9|L23_V017|44|317.280|8.32
+10|L23_V011|56|404.320|8.31
+11|L23_V008|34|246.040|8.29
+12|L23_V002|60|434.880|8.28
+13|L23_V003|42|309.720|8.14
+14|L23_V013|50|370.840|8.09
+15|L23_V016|45|335.760|8.04
+16|L23_V006|45|356.440|7.57
+17|L23_V010|39|311.400|7.51
+18|L23_V019|67|540.640|7.44
+19|L23_V022|44|364.120|7.25
+20|L23_V024|46|398.880|6.92
+21|L23_V005|26|242.080|6.44
+22|L23_V021|57|543.760|6.29
+23|L23_V025|85|859.560|5.93
+24|L23_V023|37|394.760|5.62
+25|L23_V020|30|384.640|4.68
+Q14. Lời nói gắn với khung hình gần nhất
+segment_id|start_sec|end_sec|keyframe_id|keyframe_sec|speech
+----------|---------|-------|-----------|------------|------
+1|.070|.742|65387|.520|CẬU
+2|1.574|6.620|65390|3.840|VỊ TRÍ TỐT NHẤT ĐỂ CHANH NƯỚC RÚT TẠI Ở VÒNG ĐUA THỨ MƯỜI LĂ
+3|8.710|13.756|65398|11.280|CHÚNG TA ĐANG THẤY ĐÂY LÀ CÁI RÙA CỦA ĐOÀN ĐÔNG HỌ CŨNG BÁO 
+4|13.830|18.876|65402|16.520|HỌ CHUẨN BỊ BƯỚC VÀO VÒNG CHẠY CUỐI CÙNG CỦA CHẶNG ĐUA NGÀY 
+5|24.710|29.980|65408|28.000|TÔI THẤY BA VẬN ĐỘNG VIÊN VẪN ĐANG RẤT QUYẾT TÂM TRÊN MÀN ẢN
+6|30.054|35.420|65411|32.520|ĐANG DUY TRÌ TỐC ĐỘ RẤT CAO TUY NHIÊN PHÍA SAU CHÚNG TA ĐÃ T
+7|35.494|40.540|65414|38.520|HỌ ĐÃ VƯƠN LÊN RỒI SAU KHI HỌ QUAN SÁT THẤY ĐỘI SÁU HAI MƯƠI
+8|40.614|47.036|65417|44.520|KHÔNG ĐẢM BẢO ĐƯỢC TỐC ĐỘ ĐỂ NHẬP VÀO BA VẬN ĐỘNG VIÊN NÀY D
+9|47.110|52.284|65421|49.880|CÁC THỦ ĐÔ CỦA UB KHÔNG THÁP MÀ DẪN ĐẦU ĐANG LÀ THỦ ĐÔ MANG 
+10|52.358|58.364|65424|55.880|TAY ĐUA TRẦN NGUYỄN MINH TRÍ ĐANG CÙNG VỚI CÁC ĐỘI CỦA ANH T
+Q15. Từ khoá của yêu cầu YC-001
+term|ocr_frames|asr_segments
+----|----------|------------
+vat|0|0
+nu|0|1
+linh|0|2
+tuong|0|12
+mau|0|14
+phu|4|14
+bang|0|20
+thuat|0|20
+dap|0|23
+dung|2|21
+giua|0|24
+xanh|0|28
+mac|0|30
+vay|0|34
+lon|0|43
+xe|0|44
+so|0|53
+vang|0|65
+cuoc|0|69
+gio|0|72
+den|3|104
+ao|0|121
+do|4|236
+dua|0|451
+Q16. sp_search_footage cho yêu cầu YC-041
+keyframe_id|video_id|sample_n|pts_time|frame_idx|rrf_score|evidence
+-----------|--------|--------|--------|---------|---------|--------
+65769|L23_V002|270|432.240|10806|.016393|ocr#1
+70324|L23_V023|33|59.440|1486|.016393|asr#1
+65771|L23_V002|272|434.880|10872|.016129|ocr#2
+66473|L23_V006|105|169.400|4235|.016129|asr#2
+65967|L23_V003|196|307.080|7677|.015873|ocr#3
+video_id|start_sec
+--------|---------
+L23_V001|28.040
+Q17. Tiến độ xử lý yêu cầu
+origin|requests|with_selection|pending|approved|rejected|verified
+------|--------|--------------|-------|--------|--------|--------
+sample|120|60|84|30|6|120
+total_requests|with_selection|percent_done
+--------------|--------------|------------
+120|60|50.00
+Q18. Kết quả đánh giá
+run_id|run_name|sources|requests|recall_at_1|recall_at_5|recall_at_20|recall_at_k|mrr|avg_latency_ms|max_latency_ms
+------|--------|-------|--------|-----------|-----------|------------|-----------|---|--------------|--------------
+1|OCR + ASR|asr,ocr|120|.042|.158|.258|.308|.098|6|77
+2|SigLIP2|visual|120|.075|.125|.217|.358|.104|215|495
+3|SigLIP2 + OCR + ASR|asr,ocr,visual|120|.025|.158|.367|.525|.097|222|513
+Q19. Cây chủ đề Thể thao và số video theo nhánh
+topic|videos_in_branch
+-----|----------------
+Thể thao|25
+    Bóng đá|0
+    Đua xe đạp|25
+        Áo vàng|19
+        Diễn biến cuộc đua|25
+            Chiến thuật đồng đội|21
+            Nước rút|23
+            Tấn công và bứt phá|18
+            Về đích|20
+        Đội đua và địa phương|25
+            An Giang|22
+            Đồng Nai|6
+            Đồng Tháp|17
+            TP. Hồ Chí Minh|23
+            Vĩnh Long|23
+Q20. Đóng góp và bạn đọc theo đơn vị
+org_code|org_name|org_type|collections|videos|members
+--------|--------|--------|-----------|------|-------
+LIB|Thư viện số tư liệu nghe nhìn (đơn vị vận hành)|library|1|25|2
+MUS-D|Bảo tàng mẫu D|museum|1|0|0
+PRESS-B|Báo điện tử mẫu B|press|1|0|1
+TV-A|Đài truyền hình mẫu A|tv|1|0|0
+UNI-C|Trường đại học mẫu C|school|1|0|2
+Q21. Yêu cầu theo đơn vị và trạng thái
+organization|pending|approved|rejected
+------------|-------|--------|--------
+Báo điện tử mẫu B|28|10|2
+Trường đại học mẫu C|56|20|4
+Q22. Tỉ lệ duyệt theo mục đích sử dụng
+purpose|requests|approved|approved_percent
+-------|--------|--------|----------------
+broadcast|36|8|22.2
+education|36|8|22.2
+exhibition|12|6|50.0
+research|36|8|22.2
+(tổng)|120|30|25.0
+Q23. Giấy phép hết hạn hoặc sắp hết hạn
+license_id|request_id|licensee|valid_from|valid_to|days_left|warning
+----------|----------|--------|----------|--------|---------|-------
+1|YC-001|Báo điện tử mẫu B|2026-06-11|2026-07-11|-93|Đã hết hạn
+5|YC-017|Trường đại học mẫu C|2026-06-29|2026-07-29|-75|Đã hết hạn
+9|YC-033|Trường đại học mẫu C|2026-07-17|2026-08-16|-57|Đã hết hạn
+13|YC-049|Báo điện tử mẫu B|2026-08-04|2026-09-03|-39|Đã hết hạn
+17|YC-065|Trường đại học mẫu C|2026-08-15|2026-09-14|-28|Đã hết hạn
+2|YC-005|Trường đại học mẫu C|2026-06-19|2026-09-17|-25|Đã hết hạn
+21|YC-081|Trường đại học mẫu C|2026-09-02|2026-10-02|-10|Đã hết hạn
+6|YC-021|Trường đại học mẫu C|2026-07-07|2026-10-05|-7|Đã hết hạn
+10|YC-037|Báo điện tử mẫu B|2026-07-18|2026-10-16|4|Sắp hết hạn
+25|YC-097|Báo điện tử mẫu B|2026-09-20|2026-10-20|8|Sắp hết hạn
+29|YC-113|Trường đại học mẫu C|2026-10-01|2026-10-31|19|Sắp hết hạn
+14|YC-053|Trường đại học mẫu C|2026-08-05|2026-11-03|22|Sắp hết hạn
+Q24. Thời gian từ khi gửi đến khi được cấp phép
+username|user_type|licensed_requests|avg_hours|max_hours
+--------|---------|-----------------|---------|---------
+bandoc1|journalist|10|117|192
+nghiencuu1|researcher|10|112|192
+sinhvien1|student|10|124|192
+Q25. Video chủ đề "Về đích" chưa từng được khai thác
+video_id|title
+--------|-----
+L23_V023|Tường thuật đua xe đạp, đoạn 23
+L23_V025|Tường thuật đua xe đạp, đoạn 25

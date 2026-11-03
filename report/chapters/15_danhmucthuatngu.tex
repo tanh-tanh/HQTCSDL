@@ -1,0 +1,49 @@
+\chapter*{DANH MỤC THUẬT NGỮ}
+\addcontentsline{toc}{chapter}{DANH MỤC THUẬT NGỮ}
+
+\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{
+    >{\raggedright\arraybackslash}p{0.26\textwidth}
+    >{\raggedright\arraybackslash}p{0.26\textwidth}
+    >{\raggedright\arraybackslash}p{0.38\textwidth}
+}
+\toprule
+\textbf{Thuật ngữ tiếng Anh} & \textbf{Tiếng Việt} & \textbf{Giải thích ngắn} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Thuật ngữ tiếng Anh} & \textbf{Tiếng Việt} & \textbf{Giải thích ngắn} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+Candidate key & Khoá ứng viên & Tập thuộc tính tối thiểu xác định duy nhất một dòng. \\
+Access request & Yêu cầu khai thác & Đề nghị dùng lại một đoạn tư liệu, kèm mục đích sử dụng. \\
+Collection & Bộ sưu tập & Nhóm video do một đơn vị đóng góp và giữ bản quyền. \\
+Collation & Bảng đối chiếu & Quy tắc so sánh và sắp xếp chuỗi ký tự. \\
+Computed column & Cột tính toán & Cột có giá trị được tính từ các cột khác trong cùng dòng. \\
+Embedding & Vector biểu diễn & Vector số mô tả nội dung của ảnh hoặc câu văn. \\
+Functional dependency & Phụ thuộc hàm & $X \rightarrow Y$: giá trị của $X$ quyết định giá trị của $Y$. \\
+Ground truth & Vị trí đã xác minh & Vị trí đúng của đoạn tư liệu mà yêu cầu mẫu cần tìm, dùng để đánh giá. \\
+Impersonation & Mạo danh có kiểm soát & Phiên làm việc chạy với quyền của một người dùng khác (EXECUTE AS). \\
+Inverted index & Chỉ mục ngược & Ánh xạ từ khoá sang danh sách tài liệu chứa từ khoá đó. \\
+Keyframe & Khung hình đại diện & Ảnh được trích từ video tại một thời điểm. \\
+Least privilege & Quyền tối thiểu & Mỗi tài khoản chỉ có đúng các quyền cần cho công việc. \\
+Multiple cascade paths & Nhiều đường lan truyền & Lỗi 1785: xoá một dòng có thể tác động một bảng theo hai chuỗi khoá ngoại \texttt{CASCADE}/\texttt{SET NULL}. \\
+Ownership chaining & Chuỗi sở hữu & Cơ chế SQL Server bỏ qua kiểm tra quyền khi đối tượng gọi và đối tượng bị gọi cùng chủ sở hữu. \\
+Persisted & Lưu vật lý & Giá trị cột tính toán được lưu trên đĩa thay vì tính lại mỗi lần đọc. \\
+PIVOT & Xoay bảng & Phép biến giá trị của một cột thành nhiều cột tổng hợp. \\
+Posting & Mục chỉ mục & Một cặp (từ khoá, tài liệu) trong chỉ mục ngược. \\
+Recursive CTE & CTE đệ quy & Biểu thức bảng tự tham chiếu, dùng để duyệt cấu trúc cây. \\
+ROLLUP & Tổng con & Mở rộng \texttt{GROUP BY} thêm các dòng tổng theo cấp. \\
+Sequence & Bộ sinh số & Đối tượng CSDL cấp số tăng dần, không trùng giữa các phiên. \\
+Session context & Ngữ cảnh phiên & Các cặp khoá--giá trị gắn với một kết nối SQL Server. \\
+Stopword & Từ dừng & Hư từ quá phổ biến, bị bỏ qua khi tìm kiếm. \\
+Stored procedure & Thủ tục lưu trữ & Khối lệnh T-SQL được lưu trong CSDL và gọi bằng EXEC. \\
+Transaction & Giao dịch & Nhóm thao tác thực hiện trọn vẹn hoặc không thực hiện gì. \\
+Transitive dependency & Phụ thuộc bắc cầu & $X \rightarrow Y \rightarrow Z$ với $Y$ không phải khoá. \\
+Trigger & Bẫy sự kiện & Thủ tục tự chạy khi có INSERT, UPDATE hoặc DELETE trên bảng. \\
+Usage licence & Giấy phép sử dụng & Văn bản cho phép một đơn vị hay cá nhân dùng đoạn tư liệu trong một thời hạn. \\
+View & Khung nhìn & Bảng ảo định nghĩa bằng một câu lệnh SELECT. \\
+\end{longtable}

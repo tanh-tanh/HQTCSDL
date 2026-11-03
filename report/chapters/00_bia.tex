@@ -1,0 +1,56 @@
+% --- TRANG BÌA ---
+% Các mục trong [ ... ] là chỗ trống để nhóm tự điền.
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{tikzpicture}[remember picture,overlay]
+\draw[line width=2pt,blue!70!black]
+([xshift=3cm,yshift=-2.5cm]current page.north west)
+rectangle
+([xshift=-2cm,yshift=2.5cm]current page.south east);
+\draw[line width=0.6pt,blue!70!black]
+([xshift=3.15cm,yshift=-2.65cm]current page.north west)
+rectangle
+([xshift=-2.15cm,yshift=2.65cm]current page.south east);
+\end{tikzpicture}
+\begin{center}
+\vspace*{0.25cm}
+{\fontsize{18pt}{22pt}\selectfont\bfseries
+BỘ KHOA HỌC VÀ CÔNG NGHỆ\par}
+\vspace{0.35cm}
+{\fontsize{16pt}{20pt}\selectfont\bfseries
+HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG\par}\vspace{-0.15cm}
+\rule{5.4cm}{0.5pt}
+
+\vspace{1.2cm}
+\includegraphics[width=0.3\linewidth]{figures/images/logoptit1.png}
+
+\vspace{1.3cm}
+{\bfseries BÁO CÁO BÀI TẬP LỚN\par}
+\vspace{0.2cm}
+{\bfseries MÔN HỆ QUẢN TRỊ CƠ SỞ DỮ LIỆU\par}
+\vspace{0.45cm}
+\begin{minipage}{0.84\textwidth}
+\centering
+{\bfseries ĐỀ TÀI \\
+THIẾT KẾ VÀ TRIỂN KHAI CƠ SỞ DỮ LIỆU CHO THƯ VIỆN SỐ TƯ LIỆU NGHE NHÌN TRÊN SQL SERVER}
+\end{minipage}
+
+\vspace{1.1cm}
+\begin{tabular}{>{\bfseries}r@{\hspace{0.8cm}}p{9.5cm}}
+Giảng viên hướng dẫn: & [Học hàm, học vị, họ tên giảng viên] \\
+\addlinespace[0.3cm]
+Lớp / nhóm: & [Mã lớp] -- Nhóm [số nhóm] \\
+\addlinespace[0.3cm]
+Sinh viên thực hiện:
+& [Họ tên sinh viên 1] -- [Mã sinh viên] \\
+\addlinespace[0.25cm]
+& [Họ tên sinh viên 2] -- [Mã sinh viên] \\
+\addlinespace[0.25cm]
+& [Họ tên sinh viên 3] -- [Mã sinh viên] \\
+\end{tabular}
+
+\vfill
+{\bfseries Hà Nội - 2026}\par
+\vspace*{0.75cm}
+\end{center}
+\end{titlepage}

@@ -1,0 +1,121 @@
+request_id,request_text,video_id,start_sec,end_sec
+YC-001,"Trong đoạn tường thuật cuộc đua xe đạp, tìm cảnh linh vật mặc áo vàng đứng giữa một phụ nữ mặc váy xanh và một người áo đỏ đang giơ bảng màu đen có số 2 lớn màu đỏ.",L23_V001,0.000,0.000
+YC-002,Tìm cảnh cận rất gần một bàn tay đang cầm đồng hồ bấm giờ điện tử Casio trên đường đua xe đạp.,L23_V002,162.240,162.240
+YC-003,Tìm góc quay flycam đoàn xe đạp đi ngang tòa nhà màu trắng có mái đỏ gắn pin mặt trời và dòng chữ lớn màu trắng trên mái.,L23_V003,128.440,128.440
+YC-004,Tìm cảnh một người mặc áo khoác đỏ sẫm và áo phản quang màu cam vừa giơ bảng vòng đua màu đen có số 1 màu đỏ vừa cầm một chiếc chuông.,L23_V005,0.000,0.000
+YC-005,"Trong đoàn đua, tìm cảnh tay đua áo xanh mang số 27 đưa tay sang chạm tay tay đua mặc áo vàng trắng mang số 23.",L23_V006,260.000,260.000
+YC-006,"Tìm cảnh bốn tay đua của cùng một đội mặc trang phục vàng trắng chạy nối đuôi sát nhau, xen cạnh các tay đua mặc áo xanh.",L23_V007,70.760,70.760
+YC-007,"Tìm khung hình truyền hình picture-in-picture: ô lớn là góc flycam nhìn xuống đoàn đua bên cạnh đường ray, còn ô nhỏ phía dưới bên phải là góc quay ngang các tay đua.",L23_V008,0.000,0.000
+YC-008,Tìm góc quay ngang từ phía sau một hàng dài tay đua nhiều màu áo đang chạy sát nhau trên phố; tay đua áo vàng nằm gần phía trước hàng.,L23_V009,63.440,63.440
+YC-009,Tìm góc flycam đoàn xe đạp chạy trên con đường song song sát một tuyến đường ray tàu hỏa.,L23_V010,125.000,125.000
+YC-010,"Tìm góc máy rất thấp sát mặt đường tại vạch đích, có một vạch vàng chạy dọc giữa khung hình và bóng các tay đua đi ngang phía trên.",L23_V011,320.000,320.000
+YC-011,"Tìm cảnh ba tay đua áo xanh, đỏ đen và vàng chạy ngang trên con đường ven biển, với mặt nước và hàng cây ở phía sau.",L23_V012,8.760,8.760
+YC-012,"Tìm cảnh một nữ cảnh sát giao thông mặc đồng phục màu be, đội mũ trắng và dang tay ra hiệu; phía xa có nhiều mô tô hộ tống đoàn đua.",L23_V013,82.800,82.800
+YC-013,"Tìm góc flycam đoàn xe đạp chạy thành hàng trên làn trái, ngay cạnh một chiếc ô tô màu đen ở làn phải.",L23_V014,80.000,80.000
+YC-014,"Trong cảnh quay lại pha nước rút, tìm tay đua áo vàng đội mũ trắng ở chính giữa, kẹp giữa một tay đua áo xanh đậm và một tay đua áo xanh đỏ.",L23_V015,292.000,292.000
+YC-015,"Tìm góc flycam đoàn đua chạy trên cây cầu có lối đi màu cam, bắc qua mặt nước xanh ngọc và có thuyền neo bên phải.",L23_V016,12.680,12.680
+YC-016,"Tìm góc flycam gần như thẳng đứng cho thấy ba tay đua chạy nối đuôi ở làn trái: người mặc áo trắng đen dẫn đầu, người áo vàng ở giữa và người áo trắng phía sau; một mô tô chạy cạnh dưới tán cây.",L23_V017,9.280,9.280
+YC-017,"Trong cảnh quay lại tại đích, tìm góc máy thấp có ba tay đua đạp ngang qua một vạch vàng, phía sau là hàng rào khán giả và cột cổng màu cam.",L23_V018,504.000,504.000
+YC-018,Tìm cảnh quay từ phía sau một tay đua mặc áo vàng đang chạy ngay bên trái một chiếc ô tô màu bạc.,L23_V019,0.000,0.000
+YC-019,"Tìm cảnh cận một tay đua mặc áo xanh dương, đội mũ hồng và đeo kính phản quang đang nhìn sang phía máy quay.",L23_V021,325.480,325.480
+YC-020,"Tìm cảnh cận một tay đua mặc áo xanh dương, đội mũ trắng đen và đeo kính xanh đang giơ một tay ăn mừng sát hàng rào khán giả cầm cờ Việt Nam.",L23_V025,855.000,855.000
+YC-021,"Trong đoạn tường thuật cuộc đua xe đạp, tìm cảnh đoàn đua rẽ phải qua một đảo giao thông. Bên trái có cụm pano lớn ghi 'KỶ NIỆM 70 NĂM CHIẾN THẮNG ĐIỆN BIÊN PHỦ', còn đồ họa phía trên cho biết còn 2,5 km.",L23_V001,100.000,100.000
+YC-022,"Tìm góc quay từ mô tô phía sau một đoàn tay đua mặc chủ yếu áo trắng đang đi trên đường hai làn; bên phải là tường rào trắng, phía xa là các dãy núi đá.",L23_V002,247.320,247.320
+YC-023,"Tìm góc flycam gần như thẳng đứng tại một giao lộ rộng, nơi một nhóm nhỏ tay đua chạy thành hàng qua cột đèn trang trí; một cây xanh lớn che phần bên phải khung hình.",L23_V003,189.360,189.360
+YC-024,"Tìm cảnh nhìn trực diện một nhóm tay đua đã tách thành nhiều khoảng trên đại lộ, hai bên dày đặc khán giả và cờ phướn màu vàng; một xe hỗ trợ màu trắng chạy phía sau.",L23_V004,225.000,225.000
+YC-025,Tìm cảnh trời mưa tại cổng đích màu đỏ: mặt đường ướt phản sáng và nhiều mô tô hộ tống đang chạy dưới cổng trước khi đoàn xe đạp tới.,L23_V005,147.840,147.840
+YC-026,"Tìm cảnh lia máy cận từ bên hông ba tay đua: người áo xanh mang số 25 ở giữa, người áo xám đỏ mang số 65 ở phía dưới trái và một người áo cam ở bên phải.",L23_V006,237.880,237.880
+YC-027,Tìm góc flycam rất cao nhìn dọc một đại lộ thành phố về phía cổng đích màu đỏ; hai tòa nhà trắng lớn nằm bên trái và các tay đua còn ở xa cổng.,L23_V008,145.000,145.000
+YC-028,"Tìm góc flycam rất cao trên một con đường thẳng dài chạy giữa các cánh đồng xanh. Một xe bồn trắng đỏ đi ở làn trái, còn đoàn xe đạp kéo dài ở làn phải.",L23_V010,0.000,0.000
+YC-029,"Tìm cảnh flycam ven mặt nước có một cầu thép dạng vòm ở bên trái, hàng cây cọ và công viên ở giữa, còn đoàn xe đạp chạy trên con đường phía dưới.",L23_V011,145.000,145.000
+YC-030,Tìm góc flycam một tuyến đường trên cao uốn cong có mặt đường màu đỏ chạy sát bờ nước; bên phải là một tòa nhà kính đen bo tròn.,L23_V012,97.280,97.280
+YC-031,"Tìm góc quay thẳng từ trên cao tại khu vực đích, nơi một tay đua áo xanh đang giơ cả hai tay ăn mừng trong khi nhiều tay đua khác còn ở phía sau.",L23_V013,275.000,275.000
+YC-032,"Trong cảnh quay lại, tìm góc trực diện một đoàn đông tay đua đang nước rút, với tay đua áo vàng ở ngoài cùng bên phải và nhiều mũ đỏ xanh ở giữa; khán giả đứng sát hàng rào hai bên.",L23_V014,255.000,255.000
+YC-033,"Trong cảnh quay lại, tìm một tay đua mặc áo xanh đậm, đội mũ trắng đang giơ tay phải khi chạy một mình ở phía trước; một ô tô màu trắng theo sau.",L23_V017,257.000,257.000
+YC-034,Tìm góc flycam thẳng đứng một nhóm tay đua đã giãn thành nhiều cụm nhỏ sát hàng rào bên trái; một tay đua áo vàng chạy riêng ở phía dưới bên phải.,L23_V018,407.000,407.000
+YC-035,"Tìm góc flycam gần như thẳng đứng trên một đại lộ thưa người: hai tay đua chạy sát nhau, người trước mặc áo trắng, một người áo vàng đứng gần vạch giữa đường và đồ họa phía trên hiển thị còn 0,9 km.",L23_V019,321.000,321.000
+YC-036,"Tìm cảnh nhìn dọc qua cổng đích màu đỏ, nơi nhiều tay đua đã tách rời đang tiến về máy quay; một tay đua ở gần tiền cảnh và đoàn còn lại kéo dài dưới cổng.",L23_V020,165.000,165.000
+YC-037,"Trong cảnh quay lại pha nước rút, tìm cận cảnh ba tay đua: người bên trái mặc áo trắng xanh và mũ trắng, người giữa mặc áo xanh đỏ và mũ sọc trắng đen, người phía sau đội mũ đỏ.",L23_V022,281.240,281.240
+YC-038,"Tìm cảnh một tay đua chạy một mình ở tiền cảnh ngay dưới cổng đích màu đỏ, trong khi nhóm bám đuổi còn ở rất xa phía sau giữa hai hàng khán giả.",L23_V023,165.000,165.000
+YC-039,"Tìm góc flycam rất cao trên một đại lộ chạy sát công viên xanh và hồ nước. Bên trái đường có khu sân khấu trải thảm đỏ, còn hai bên tuyến đua đông kín khán giả.",L23_V024,240.000,240.000
+YC-040,Tìm góc flycam chính diện Dinh Độc Lập nằm giữa công viên cây xanh; phía dưới là đại lộ có cổng đích màu đỏ và khu vực tổ chức sự kiện.,L23_V025,370.320,370.320
+YC-041,Hai linh vật xanh cạnh mô tô và chữ HỒ CHÍ MINH VĨ ĐẠI,L23_V001,28.040,28.040
+YC-042,Đoàn rẽ phải qua chữ CHIẾN THẮNG ĐIỆN BIÊN và 2.6 Km,L23_V001,95.000,95.000
+YC-043,Cổng ĐÍCH đỏ màn Chặng 2-62 km và lưới màu,L23_V002,229.080,229.080
+YC-044,Xe bán tải dưới cổng ĐÍCH đỏ với ô hai bên,L23_V002,236.080,236.080
+YC-045,Flycam đoàn tại ĐÍCH cờ caro trái và ô phải,L23_V003,222.000,222.000
+YC-046,Áo xanh vàng số 51 rail TÔN ĐÔNG Á và banner NON SÔNG,L23_V003,268.560,268.560
+YC-047,Người áo trắng chỉ phải cạnh biển HỒNG THÁI PHÚC LỘC,L23_V004,170.480,170.480
+YC-048,Cổng ĐÍCH đỏ quan chức xanh cờ caro mũ cam,L23_V004,360.000,360.000
+YC-049,Đoàn vào cua cảnh sát xanh và overlay -2.5 Km,L23_V005,60.000,60.000
+YC-050,Đám đông áo đỏ cờ VN sau rail TÔN ĐÔNG Á,L23_V005,145.000,145.000
+YC-051,Flycam đoàn một hàng P.Rikunov 63 Km/h và 1.2 Km,L23_V006,155.000,155.000
+YC-052,Flycam đoàn dài với overlay 0.6 Km và bóng cây lớn,L23_V021,104.800,104.800
+YC-053,Bốn panel HCM DDT TLT VIN với 24.9 Km và 52 Km/h,L23_V007,169.360,169.360
+YC-054,Bốn panel hai áo xanh trái bốn vàng đỏ phải,L23_V007,181.000,181.000
+YC-055,Nước rút qua biển BỆNH VIỆN ĐA KHOA và 0.9 Km,L23_V008,125.000,125.000
+YC-056,Replay cổng đỏ hai cờ VN màn Chặng 8-152 km,L23_V008,230.000,230.000
+YC-057,Đường đích trống cờ caro banner Vinh Đồng Hới 2.0 Km,L23_V009,82.440,82.440
+YC-058,Flycam đoàn dưới dây điện M.Laas 117 CVL và 1.5 Km,L23_V009,118.280,118.280
+YC-059,Áo xanh xe đỏ profile NGÔ MINH QUÂN 2004 1m72 62kg,L23_V010,15.000,15.000
+YC-060,Replay áo xanh giữa đỏ và xanh đậm rail TÔN ĐÔNG Á,L23_V010,225.000,225.000
+YC-061,Đoàn đông vào cua Chặng 11 2.3 Km và mũ cam,L23_V011,20.000,20.000
+YC-062,Đoàn hướng cầu thép máy ảnh và chữ VÒNG CUỐI,L23_V011,35.000,35.000
+YC-063,Flycam cầu dây văng caption CẦU THUẬN PHƯỚC,L23_V012,108.000,108.000
+YC-064,Flycam P.Rikunov 027 43 Km/h và hai người bám,L23_V012,188.480,188.480
+YC-065,ĐÍCH đỏ Chặng 13 88.5 km Đà Nẵng Tam Kỳ cờ caro,L23_V013,235.920,235.920
+YC-066,Cổng ĐÍCH đỏ người áo trắng dẫn đầu trước màn vàng,L23_V013,241.000,241.000
+YC-067,Flycam bờ biển cong 1.7 Km 50 Km/h và núi,L23_V014,110.000,110.000
+YC-068,Nước rút mascot vàng ô đỏ trắng và 0.2 Km,L23_V014,205.000,205.000
+YC-069,ĐÍCH đỏ Chặng 15 100 km Quy Nhơn Tuy Hòa mũ cam,L23_V015,219.000,219.000
+YC-070,Mô tô xanh vào cổng đỏ màn Chặng 15 100 km,L23_V015,225.000,225.000
+YC-071,Flycam đoàn cạnh hai xe buýt marshal vàng 1.1 Km,L23_V016,116.240,116.240
+YC-072,Áo vàng đỏ giơ nắm tay rail HTV 7 TÔN ĐÔNG Á,L23_V016,191.560,191.560
+YC-073,Replay flycam áo xanh dẫn đầu nhóm bám cờ VN,L23_V017,192.840,192.840
+YC-074,Cổng đỏ dốc Chặng 17 136 km Nha Trang Đà Lạt,L23_V017,233.000,233.000
+YC-075,Nước rút đông áo vàng ô bên phải và 0.3 Km,L23_V018,241.000,241.000
+YC-076,MC áo hồng laptop Apple và biển chúc mừng Đà Lạt,L23_V018,383.280,383.280
+YC-077,Đường đích BIDV mô tô 0.4 Km và +0.17,L23_V019,122.560,122.560
+YC-078,Tay đua bóng cây xe bán tải và ba biển cấm,L23_V019,377.920,377.920
+YC-079,Flycam năm người một hàng mô tô phải và 1 Km,L23_V020,19.400,19.400
+YC-080,Flycam giao lộ xe máy billboard BECAMEX 0789 61 3939,L23_V020,47.880,47.880
+YC-081,Nghe Trần Tuấn Kiệt và Peter Rikunov nước rút rồi tìm cổng đích,L23_V001,145.000,145.000
+YC-082,Nghe ba vị trí nhất nhì ba rồi tìm flycam đích và đám đông,L23_V001,151.360,151.360
+YC-083,Nghe HCMC và Đồng Nai dẫn bảng rồi tìm nhóm đua,L23_V002,200.680,200.680
+YC-084,Nghe lá cờ tổ quốc tung bay rồi tìm góc đua truyền hình,L23_V002,351.800,351.800
+YC-085,Nghe phải qua một cây cầu rồi tìm cầu và đường đua,L23_V003,55.320,55.320
+YC-086,Nghe hai tay đua còn lại cán đích rồi tìm flycam đích,L23_V003,268.560,268.560
+YC-087,Nghe mốc 1:29 áo cam đổi chủ rồi tìm đoàn gần đích,L23_V004,210.000,210.000
+YC-088,Nghe Nguyễn Tấn Hoài áo cam rồi tìm nhóm ở đích,L23_V004,215.000,215.000
+YC-089,Nghe rẽ vào đường thẳng cuối rồi tìm đoàn chuẩn bị nước rút,L23_V005,90.000,90.000
+YC-090,Nghe Trần Tuấn Kiệt về đích đầu tiên rồi tìm nước rút,L23_V005,165.000,165.000
+YC-091,Nghe xe mô tô tiền rồi tìm mô tô dẫn trước đoàn,L23_V006,65.000,65.000
+YC-092,Nghe mưa kéo dài từ đầu ngày rồi tìm cảnh đường đua ướt,L23_V006,315.000,315.000
+YC-093,Nghe góc quay flycam rồi tìm đoàn từ trên cao,L23_V007,51.920,51.920
+YC-094,Nghe Ivanov bảo vệ áo vàng rồi tìm khung hậu đích,L23_V007,358.920,358.920
+YC-095,Nghe Đồng Tháp bên phải hai áo vàng đỏ phía trước rồi tìm đội hình,L23_V008,50.000,50.000
+YC-096,Nghe Rikunov cạnh Martinas áo trắng sau rồi tìm lead-out,L23_V008,100.440,100.440
+YC-097,Nghe Martinas hướng đến thắng chặng ba liên tiếp rồi tìm nước rút,L23_V009,34.000,34.000
+YC-098,Nghe Mí Ram lead-out cho Martinas Vĩnh Long rồi tìm nhóm chiến thuật,L23_V009,92.520,92.520
+YC-099,Nghe ba tay đua Đồng Tháp tràn lên rồi tìm ba người ở đầu,L23_V010,85.000,85.000
+YC-100,Nghe Lê Nguyệt Minh vị trí đẹp khi đích rồi tìm nước rút,L23_V010,145.000,145.000
+YC-101,Nghe chiến thắng gọi tên Martinas rồi tìm cận đích,L23_V011,190.000,190.000
+YC-102,Nghe xem lại nước rút ba vận động viên góc khác rồi tìm replay,L23_V011,300.000,300.000
+YC-103,Nghe 500m còn lại HCMC chưa tấn công Prolop dẫn rồi tìm nước rút,L23_V012,285.280,285.280
+YC-104,Nghe Prolop làm tốc độ Rikunov rút 300m rồi tìm pha đích,L23_V012,304.000,304.000
+YC-105,Nghe áo vàng lùi Vĩnh Long tách Võ An làm nước rồi tìm đội hình,L23_V013,119.520,119.520
+YC-106,Nghe Nguyễn Văn Bình tranh hạng ba bốn rồi tìm thứ tự đích,L23_V013,306.320,306.320
+YC-107,Nghe Martinas áo xanh có năm máy kéo rồi tìm nhóm đội,L23_V014,45.000,45.000
+YC-108,Nghe Trần Tuấn Kiệt chạm vạch trước Rikunov rồi tìm cận đích,L23_V014,240.000,240.000
+YC-109,Nghe Vĩnh Long vào cua hơn 50km/h rồi tìm lead-out ở góc cua,L23_V015,41.120,41.120
+YC-110,Nghe Rikunov trở lại nước rút mét cuối rồi tìm đích,L23_V015,311.000,311.000
+YC-111,Nghe Vĩnh Long tăng tốc lên phía trên rồi tìm trật tự đoàn,L23_V016,136.920,136.920
+YC-112,Nghe Lê Nguyệt Minh lách trái vượt lên rồi tìm pha tấn công,L23_V016,250.000,250.000
+YC-113,Nghe Sava Novikov tăng tốc còn 1.5km rồi tìm người thoát,L23_V017,51.320,51.320
+YC-114,Nghe replay tấn công đúng lúc 1.5km rồi tìm leader và đích,L23_V017,154.520,154.520
+YC-115,Nghe Vĩnh Long chặn đối thủ rồi tìm đội hình nhóm,L23_V018,145.560,145.560
+YC-116,Nghe xem lại flycam màn nước rút rồi tìm replay trên cao,L23_V018,396.000,396.000
+YC-117,Nghe nhóm đầu Trần Phú rẽ phải 28 Tháng 3 rồi tìm góc cua,L23_V019,39.000,39.000
+YC-118,Nghe Huế Đà Nẵng qua đèo Hải Vân chặng 17 rồi tìm đường đua,L23_V019,122.560,122.560
+YC-119,Nghe 1.2km cuối sau các cuộc tấn công rồi tìm đoàn,L23_V020,25.800,25.800
+YC-120,Nghe khán giả miền Tây ủng hộ đoàn đua rồi tìm đám đông,L23_V021,435.960,435.960

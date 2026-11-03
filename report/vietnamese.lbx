@@ -1,0 +1,17 @@
+\ProvidesFile{vietnamese.lbx}[2026/10/12 Vietnamese bibliography strings for this report]
+% biblatex ships no Vietnamese language file.  Inherit everything from
+% English and translate the strings that the ieee style prints.
+\InheritBibliographyExtras{english}
+\DeclareBibliographyStrings{%
+  inherit   = {english},
+  and       = {{và}{và}},
+  andothers = {{và cộng sự}{và cs\adddot}},
+  in        = {{trong}{trong}},
+  jourvol   = {{tập}{tập}},
+  volume    = {{tập}{tập}},
+  number    = {{số}{{số}}},
+  page      = {{trang}{tr\adddot}},
+  pages     = {{trang}{tr\adddot}},
+  edition   = {{lần xuất bản}{lần xb\adddot}},
+}
+\endinput

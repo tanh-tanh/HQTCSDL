@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}{{ frame.video_id }} {{ frame.pts_time }}s · Thư viện số nghe nhìn{% endblock %}
+{% block content %}
+<section class="frame-layout">
+  <div>
+    <img class="hero" src="/img/{{ frame.keyframe_id }}" alt="{{ frame.video_id }}">
+    <div class="strip">
+      {% for item in neighbours %}
+      <a href="/frames/{{ item.keyframe_id }}{% if request_id %}?request_id={{ request_id }}{% endif %}"
+         class="{% if item.keyframe_id == frame.keyframe_id %}current{% endif %}">
+        <img src="/img/{{ item.keyframe_id }}" loading="lazy" alt="">
+        <span>{{ "%.1f"|format(item.pts_time) }}s</span>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  <aside class="card stack">
+    <h1>{{ frame.title }} · {{ "%.2f"|format(frame.pts_time) }}s</h1>
+    <dl class="facts">
+      <dt>bộ sưu tập</dt><dd>{{ frame.collection_title }}</dd>
+      <dt>đơn vị</dt><dd>{{ frame.owner }}</dd>
+      <dt>truy cập</dt><dd>{% if frame.access_level == "open" %}mở{% else %}hạn chế (cần giấy phép){% endif %}</dd>
+      {% if frame.topics %}<dt>chủ đề</dt><dd>{{ frame.topics }}</dd>{% endif %}
+      <dt>video_id</dt><dd>{{ frame.video_id }}</dd>
+      <dt>keyframe_id</dt><dd>{{ frame.keyframe_id }}</dd>
+      <dt>frame_idx</dt><dd>{{ frame.frame_idx }}</dd>
+      <dt>fps</dt><dd>{{ frame.fps or "?" }}</dd>
+      <dt>batch</dt><dd>{{ frame.batch }}</dd>
+    </dl>
+    {% if frame.ocr_text %}<h2>OCR</h2><p>{{ frame.ocr_text }}</p>{% endif %}
+    {% if speech %}
+    <h2>Lời nói (±15s)</h2>
+    <ul class="speech">
+      {% for line in speech %}<li><b>{{ "%.1f"|format(line.start_sec) }}s</b> {{ line.asr_text }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if chosen_for and user.can('selection.write') %}
+    <h2>Đã được chọn cho yêu cầu khai thác</h2>
+    <ul>
+      {% for item in chosen_for %}
+      <li>{{ item.request_id }} <span class="muted">({{ item.selected_by or "?" }})</span>
+        {% if user.can('selection.write') %}
+        <form method="post" action="/selections/{{ item.selection_id }}/delete" class="inline">
+          <button type="submit" class="link danger">bỏ</button>
+        </form>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if user.can('selection.write') %}
+    <h2>Chọn đoạn này cho yêu cầu khai thác</h2>
+    <form method="post" action="/selections" class="stack">
+      <input type="hidden" name="keyframe_id" value="{{ frame.keyframe_id }}">
+      <select name="request_id" required>
+        {% for row in queries %}
+        <option value="{{ row.request_id }}" {% if row.request_id == request_id %}selected{% endif %}>{{ row.request_id }}</option>
+        {% else %}
+        <option value="" disabled>Không có yêu cầu nào đang chờ xử lý</option>
+        {% endfor %}
+      </select>
+      <input name="note" maxlength="255" placeholder="Ghi chú (không bắt buộc)">
+      <button type="submit">Chọn đoạn</button>
+    </form>
+    {% endif %}
+  </aside>
+</section>
+{% endblock %}

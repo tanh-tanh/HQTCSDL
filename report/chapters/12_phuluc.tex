@@ -1,0 +1,73 @@
+\chapter*{PHỤ LỤC}
+\addcontentsline{toc}{chapter}{PHỤ LỤC}
+
+\section*{Phụ lục A. Hướng dẫn chạy}
+\addcontentsline{toc}{section}{Phụ lục A. Hướng dẫn chạy}
+
+\textbf{A.1. Chỉ chạy script SQL} (cần SQL Server 2017 trở lên, bản Express được, và SSMS
+hoặc sqlcmd):
+\begin{enumerate}
+    \item Mở \texttt{db/full\_setup.sql} trong SSMS và chọn Execute. Script tạo lại CSDL
+    \texttt{video\_archive} (xoá bản cũ nếu có), tạo mọi đối tượng, chèn dữ liệu mẫu và lập
+    chỉ mục văn bản.
+    \item Mở và chạy \texttt{db/10\_queries.sql} (truy vấn nghiệp vụ), rồi
+    \texttt{db/11\_tests.sql} (kiểm thử). Cả hai chỉ đọc hoặc rollback.
+\end{enumerate}
+Tương đương bằng dòng lệnh (dùng \texttt{-o} để ghi kết quả ra tệp, tránh việc console của
+Windows làm hỏng tiếng Việt):
+\begin{lstlisting}[style=terminal, language={}]
+sqlcmd -S .\SQLEXPRESS -E -C -f 65001 -I -b -i db\full_setup.sql
+sqlcmd -S .\SQLEXPRESS -E -C -f 65001 -I -d video_archive -i db\10_queries.sql -o queries.txt
+sqlcmd -S .\SQLEXPRESS -E -C -f 65001 -I -d video_archive -i db\11_tests.sql -o tests.txt
+\end{lstlisting}
+
+\textbf{A.2. Chạy ứng dụng web} (cần thêm Python, công cụ uv và ODBC Driver 18 for SQL Server):
+\begin{lstlisting}[style=terminal, language={}]
+copy .env.example .env
+uv sync --extra visual
+uv run --env-file .env footage db init --reset --yes
+uv run --env-file .env footage serve
+\end{lstlisting}
+Sau đó mở \texttt{http://127.0.0.1:8000} và đăng nhập bằng một trong các tài khoản demo
+\texttt{admin} (quản trị), \texttt{thuthu1} (cán bộ thư viện), \texttt{bandoc1},
+\texttt{nghiencuu1}, \texttt{sinhvien1} (bạn đọc); mật khẩu ghi trong \texttt{README.md}, chỉ
+dùng để demo.
+
+\textbf{A.3. Dữ liệu cần tải thêm} (chỉ cho phần hiển thị ảnh và kênh hình ảnh): ảnh
+\texttt{L23.zip} (1,1 GB) giải nén vào \texttt{data/archive/keyframes/}; model SigLIP2 (4,5 GB)
+vào \texttt{models/}; vector của lô L23 tải bằng \texttt{footage fetch-index --batches L23}
+(khoảng 17 MB).
+
+\textbf{A.4. Đo chất lượng tìm kiếm và kiểm thử tự động:}
+\begin{lstlisting}[style=terminal, language={}]
+uv run --env-file .env footage eval --name "SigLIP2 + OCR + ASR" --sources visual,ocr,asr
+uv run --env-file .env pytest
+\end{lstlisting}
+
+\section*{Phụ lục B. Cấu trúc thư mục dự án}
+\addcontentsline{toc}{section}{Phụ lục B. Cấu trúc thư mục dự án}
+
+\begin{lstlisting}[style=terminal, language={}]
+db/                  T-SQL scripts 00..11 and full_setup.sql
+docs/output/         output of full_setup.sql, 10_queries.sql, 11_tests.sql
+labels/              120 sample access requests with verified moments
+src/footage/         web app and command line (Python)
+  db.py              ODBC connection, EXECUTE AS, script runner
+  sample.py          generator of 09_sample_data.sql
+  fetch_index.py     downloads only the L23 rows of the FAISS index
+  visual.py          SigLIP2 text encoder + FAISS search
+  web.py, templates/ web pages
+tests/               automated tests (pytest)
+report/              this report (LaTeX)
+data/map-keyframes/  fps of each video
+\end{lstlisting}
+
+\section*{Phụ lục C. Kết quả chạy script kiểm thử}
+\addcontentsline{toc}{section}{Phụ lục C. Kết quả chạy script kiểm thử}
+
+Trích kết quả \texttt{db/11\_tests.sql} (phần A--C: ràng buộc, giao dịch, phân quyền), lấy nguyên từ
+\texttt{docs/output/11\_tests.txt}:
+
+{\footnotesize
+\VerbatimInput[frame=single, fontsize=\scriptsize]{chapters/generated/tests_excerpt.txt}
+}

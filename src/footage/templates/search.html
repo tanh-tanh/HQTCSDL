@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <form method="get" action="/" class="stack">
+    <label>Chọn yêu cầu khai thác
+      <select name="request_id" onchange="this.form.q.value=''; this.form.submit()">
+        <option value="">— tự nhập mô tả —</option>
+        {% for row in queries %}
+        <option value="{{ row.request_id }}" {% if row.request_id == request_id %}selected{% endif %}>
+          {{ row.request_id }}{% if row.has_ground_truth %} ✓đã xác minh{% endif %} · {{ statuses[row.status] }}{% if row.selection_count %} · {{ row.selection_count }} đoạn đã chọn{% endif %}
+        </option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>Mô tả khung hình cần tìm
+      <textarea name="q" rows="3" placeholder="Ví dụ: tay đua áo vàng về đích, phía sau là cổng chào và khán giả hai bên đường">{{ q }}</textarea>
+    </label>
+    <div class="row">
+      {% for name in sources %}
+      <label class="check"><input type="checkbox" name="src" value="{{ name }}" {% if name in chosen %}checked{% endif %}> {{ labels[name] }}</label>
+      {% endfor %}
+      <label class="check">Top-K <input type="number" name="k" value="{{ k }}" min="1" max="200" class="small"></label>
+      <button type="submit">Tìm</button>
+    </div>
+    <p class="muted">Kênh hình ảnh: {{ visual.status if visual else "tắt (chưa cấu hình index SigLIP2)" }}</p>
+  </form>
+</section>
+
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if outcome %}
+<section>
+  <p class="muted">
+    {{ outcome.results|length }} kết quả · {{ outcome.latency_ms }} ms · nguồn: {{ outcome.sources|join(", ") }}
+    {% for note in outcome.notes %}<br>{{ note }}{% endfor %}
+  </p>
+  <div class="grid">
+    {% for row in outcome.results %}
+    <a class="tile" href="/frames/{{ row.keyframe_id }}{% if request_id %}?request_id={{ request_id }}{% endif %}">
+      <img src="/img/{{ row.keyframe_id }}" loading="lazy" alt="{{ row.video_id }} {{ row.pts_time }}s">
+      <span class="caption">#{{ row.rank }} · {{ row.video_id }} · {{ "%.1f"|format(row.pts_time) }}s</span>
+      <span class="evidence">{{ row.evidence }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}

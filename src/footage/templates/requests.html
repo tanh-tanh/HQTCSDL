@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% block title %}Yêu cầu khai thác · Thư viện số nghe nhìn{% endblock %}
+{% block content %}
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+{% if user.can('request.submit') %}
+<section class="card">
+  <h1>Gửi yêu cầu khai thác</h1>
+  <form method="post" action="/requests" class="stack">
+    <label>Mô tả đoạn tư liệu cần dùng
+      <textarea name="request_text" rows="2" required maxlength="2000"
+        placeholder="Ví dụ: đoạn tay đua áo vàng về đích, khán giả hai bên đường"></textarea>
+    </label>
+    <div class="row">
+      <label>Mục đích sử dụng
+        <select name="purpose">
+          {% for code, label in purposes.items() %}<option value="{{ code }}">{{ label }}</option>{% endfor %}
+        </select>
+      </label>
+      <button type="submit">Gửi yêu cầu</button>
+    </div>
+  </form>
+</section>
+{% endif %}
+
+<section class="card">
+  <div class="row spread">
+    <h1>{% if all_requests %}Yêu cầu khai thác{% else %}Yêu cầu của tôi{% endif %}</h1>
+    <a class="button" href="/selections/export.csv">Xuất CSV đoạn tư liệu</a>
+  </div>
+  <p class="row">
+    <span class="muted">Trạng thái:</span>
+    <a href="/requests">tất cả ({{ counts.values()|sum }})</a>
+    {% for code, label in statuses.items() %}
+    <a href="/requests?status={{ code }}" {% if code == status %}class="current"{% endif %}>{{ label }} ({{ counts.get(code, 0) }})</a>
+    {% endfor %}
+  </p>
+  <table>
+    <tr><th>Mã</th><th>Người yêu cầu</th><th>Mục đích</th><th>Trạng thái</th><th>Đoạn đã chọn</th><th>Giấy phép đến</th><th></th></tr>
+    {% for row in progress %}
+    <tr>
+      <td><a href="/?request_id={{ row.request_id }}" title="{{ row.request_text }}">{{ row.request_id }}</a></td>
+      <td>{{ row.requested_by }}{% if row.organization %}<br><span class="muted">{{ row.organization }}</span>{% endif %}</td>
+      <td>{{ purposes[row.purpose] }}</td>
+      <td><span class="status {{ row.status }}">{{ statuses[row.status] }}</span></td>
+      <td>{{ row.selection_count }}</td>
+      <td>{{ row.license_valid_to or "—" }}</td>
+      <td>
+        {% if user.can('license.grant') and row.status == 'pending' %}
+          {% if row.selection_count %}
+          <form method="post" action="/requests/{{ row.request_id }}/license" class="inline">
+            <select name="valid_days" aria-label="Thời hạn">
+              {% for days in (30, 90, 180, 365) %}<option value="{{ days }}" {% if days == 365 %}selected{% endif %}>{{ days }} ngày</option>{% endfor %}
+            </select>
+            <button type="submit" class="link">cấp phép</button>
+          </form>
+          {% endif %}
+          <form method="post" action="/requests/{{ row.request_id }}/reject" class="inline">
+            <button type="submit" class="link danger">từ chối</button>
+          </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="7">Chưa có yêu cầu nào.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+{% if grouped %}
+<section class="card">
+  <h1>Đoạn tư liệu đã chọn</h1>
+  {% for request_id, rows in grouped.items() %}
+  <h2>{{ request_id }}</h2>
+  <table>
+    <tr><th>#</th><th>Khung hình</th><th>video</th><th>frame_idx</th><th>giây</th><th>người chọn</th><th>ghi chú</th><th></th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>{{ row.rank_no }}</td>
+      <td><a href="/frames/{{ row.keyframe_id }}?request_id={{ request_id }}"><img class="thumb" src="/img/{{ row.keyframe_id }}" loading="lazy" alt=""></a></td>
+      <td>{{ row.video_id }}</td>
+      <td>{{ row.frame_idx }}</td>
+      <td>{{ "%.1f"|format(row.pts_time) }}</td>
+      <td>{{ row.selected_by or "?" }}</td>
+      <td>{{ row.note }}</td>
+      <td>
+        {% if user.can('selection.write') and editable.get(request_id) %}
+        <form method="post" action="/selections/{{ row.selection_id }}/delete" class="inline">
+          <button type="submit" class="link danger">bỏ</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endfor %}
+</section>
+{% endif %}
+{% endblock %}

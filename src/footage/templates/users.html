@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Tài khoản · Thư viện số nghe nhìn{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Tài khoản</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <table>
+    <tr><th>Tên</th><th>Họ tên</th><th>Đơn vị · đối tượng</th><th>Vai trò · trạng thái · đặt lại mật khẩu</th><th>Đăng nhập gần nhất</th></tr>
+    {% for row in users %}
+    <tr>
+      <td>{{ row.username }}</td>
+      <td>{{ row.full_name }}</td>
+      <td>{{ row.organization or "—" }}<br><span class="muted">{{ user_types[row.user_type] }}</span></td>
+      <td>
+        <form method="post" action="/admin/users/{{ row.user_id }}" class="row">
+          {% for role in roles %}
+          <label class="check"><input type="checkbox" name="roles" value="{{ role.role_name }}" {% if role.role_name in row.roles.split(", ") %}checked{% endif %}> {{ role.role_name }}</label>
+          {% endfor %}
+          <label class="check"><input type="checkbox" name="is_active" value="1" {% if row.is_active %}checked{% endif %}> hoạt động</label>
+          <input name="password" type="password" placeholder="mật khẩu mới" autocomplete="new-password" class="small-text">
+          <button type="submit">Lưu</button>
+        </form>
+      </td>
+      <td>{{ row.last_login_at or "—" }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="card">
+  <h2>Tạo tài khoản</h2>
+  <form method="post" action="/admin/users" class="row">
+    <input name="username" placeholder="tên đăng nhập" required pattern="[a-z0-9_.\-]{3,32}">
+    <input name="full_name" placeholder="họ tên">
+    <input name="password" type="password" placeholder="mật khẩu (≥ 8 ký tự)" required minlength="8" autocomplete="new-password">
+    <select name="organization_id" aria-label="Đơn vị">
+      <option value="">— cá nhân —</option>
+      {% for org in organizations %}<option value="{{ org.organization_id }}">{{ org.org_name }}</option>{% endfor %}
+    </select>
+    <select name="user_type" aria-label="Đối tượng">
+      {% for code, label in user_types.items() %}<option value="{{ code }}" {% if code == "other" %}selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select>
+    {% for role in roles %}
+    <label class="check"><input type="checkbox" name="roles" value="{{ role.role_name }}" {% if role.role_name == "reader" %}checked{% endif %}> {{ role.role_name }}</label>
+    {% endfor %}
+    <button type="submit">Tạo</button>
+  </form>
+</section>
+
+<section class="card">
+  <h2>Nhật ký gần đây (audit_log)</h2>
+  <table>
+    <tr><th>Lúc</th><th>Người</th><th>Hành động</th><th>Chi tiết</th></tr>
+    {% for row in audit %}
+    <tr><td>{{ row.created_at }}</td><td>{{ row.username or "—" }}</td><td>{{ row.action }}</td><td>{{ row.detail }}</td></tr>
+    {% endfor %}
+  </table>
+</section>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Đánh giá · Thư viện số nghe nhìn{% endblock %}
+{% block content %}
+<section class="card">
+  <h1>Đánh giá trên yêu cầu mẫu đã xác minh</h1>
+  <p class="muted">Một kết quả tính là đúng khi cùng video và nằm trong ±tolerance giây quanh thời điểm đã xác minh.
+    Tạo lượt mới bằng <code>footage eval --name ... --sources visual,ocr,asr</code>; số liệu đọc từ view <code>v_eval_summary</code>.</p>
+  <table>
+    <tr><th>run</th><th>tên</th><th>nguồn</th><th>yêu cầu</th><th>R@1</th><th>R@5</th><th>R@20</th><th>R@K</th><th>MRR</th><th>TB ms</th><th>max ms</th></tr>
+    {% for run in runs %}
+    <tr>
+      <td>{{ run.run_id }}</td><td>{{ run.run_name }}</td><td>{{ run.sources }}</td><td>{{ run.requests }}</td>
+      <td>{{ run.recall_at_1 }}</td><td>{{ run.recall_at_5 }}</td><td>{{ run.recall_at_20 }}</td>
+      <td>{{ run.recall_at_k }} (K={{ run.top_k }})</td><td>{{ run.mrr }}</td>
+      <td>{{ run.avg_latency_ms }}</td><td>{{ run.max_latency_ms }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="11">Chưa có lượt đánh giá nào.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+<section class="card">
+  <h2>Tìm kiếm thực tế (search_log)</h2>
+  <p>{{ searches.searches }} lượt · trung bình {{ searches.avg_ms or 0 }} ms · lâu nhất {{ searches.max_ms or 0 }} ms</p>
+</section>
+{% endblock %}

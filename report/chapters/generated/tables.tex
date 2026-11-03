@@ -1,0 +1,431 @@
+\subsection{Nhóm danh mục thư viện}
+
+\textbf{Bảng \texttt{organizations}} -- Đơn vị thành viên: đóng góp bộ sưu tập và/hoặc có bạn đọc khai thác.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{organizations}}\label{tab:col_organizations}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{organization\_id} & {\footnotesize\texttt{smallint}} & không & PK, IDENTITY & Mã đơn vị (tự tăng) \\
+\texttt{org\_code} & {\footnotesize\texttt{varchar(16)}} & không & UQ & Mã viết tắt, vd. LIB \\
+\texttt{org\_name} & {\footnotesize\texttt{nvarchar(200)}} & không & UQ & Tên đơn vị \\
+\texttt{org\_type} & {\footnotesize\texttt{varchar(16)}} & không &  & Loại: library, tv, press, school, museum \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm tham gia \\
+\end{longtable}
+
+\textbf{Bảng \texttt{collections}} -- Bộ sưu tập do một đơn vị đóng góp và giữ bản quyền.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{collections}}\label{tab:col_collections}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{collection\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã bộ sưu tập (tự tăng) \\
+\texttt{collection\_code} & {\footnotesize\texttt{varchar(16)}} & không & UQ & Mã viết tắt, vd. DXD \\
+\texttt{title} & {\footnotesize\texttt{nvarchar(200)}} & không &  & Tên bộ sưu tập \\
+\texttt{organization\_id} & {\footnotesize\texttt{smallint}} & không & FK $\rightarrow$ organizations & Đơn vị đóng góp, giữ bản quyền \\
+\texttt{access\_level} & {\footnotesize\texttt{varchar(16)}} & không & DF 'restricted' & open: dùng tự do; restricted: cần giấy phép \\
+\texttt{description} & {\footnotesize\texttt{nvarchar(1000)}} & không & DF N'' & Mô tả, nguồn gốc \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm tạo \\
+\end{longtable}
+
+\textbf{Bảng \texttt{topics}} -- Cây chủ đề phân loại video (quan hệ đệ quy qua parent\_topic\_id).
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{topics}}\label{tab:col_topics}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{topic\_id} & {\footnotesize\texttt{smallint}} & không & PK, IDENTITY & Mã chủ đề (tự tăng) \\
+\texttt{topic\_name} & {\footnotesize\texttt{nvarchar(100)}} & không & UQ & Tên chủ đề \\
+\texttt{parent\_topic\_id} & {\footnotesize\texttt{smallint}} & có & FK $\rightarrow$ topics & Chủ đề cha (NULL nếu là gốc) \\
+\end{longtable}
+
+\textbf{Bảng \texttt{video\_topics}} -- Quan hệ nhiều--nhiều giữa video và chủ đề.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{video\_topics}}\label{tab:col_video_topics}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{video\_id} & {\footnotesize\texttt{varchar(16)}} & không & PK, FK $\rightarrow$ videos & Video \\
+\texttt{topic\_id} & {\footnotesize\texttt{smallint}} & không & PK, FK $\rightarrow$ topics & Chủ đề gắn cho video \\
+\end{longtable}
+
+\subsection{Nhóm kho dữ liệu video}
+
+\textbf{Bảng \texttt{videos}} -- Video trong kho, thuộc một bộ sưu tập.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{videos}}\label{tab:col_videos}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{video\_id} & {\footnotesize\texttt{varchar(16)}} & không & PK & Mã video, dạng Lxx\_Vyyy \\
+\texttt{batch} & {\footnotesize\texttt{tính toán}} & có &  & Lô dữ liệu (L23...), cột tính toán từ video\_id \\
+\texttt{collection\_id} & {\footnotesize\texttt{int}} & không & FK $\rightarrow$ collections & Bộ sưu tập chứa video \\
+\texttt{title} & {\footnotesize\texttt{nvarchar(200)}} & không &  & Nhan đề trong phiếu mô tả \\
+\texttt{fps} & {\footnotesize\texttt{decimal(6,3)}} & có &  & Số khung hình mỗi giây của video gốc \\
+\end{longtable}
+
+\textbf{Bảng \texttt{keyframes}} -- Khung hình được trích từ video; khoá chính trùng số thứ tự vector trong FAISS.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{keyframes}}\label{tab:col_keyframes}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{keyframe\_id} & {\footnotesize\texttt{int}} & không & PK & Mã khung hình, trùng id vector FAISS \\
+\texttt{video\_id} & {\footnotesize\texttt{varchar(16)}} & không & UQ, FK $\rightarrow$ videos & Video chứa khung hình \\
+\texttt{sample\_n} & {\footnotesize\texttt{int}} & không & UQ & Số thứ tự khung hình trong video (tên file ảnh) \\
+\texttt{pts\_time} & {\footnotesize\texttt{decimal(10,3)}} & không & UQ & Thời điểm trong video (giây) \\
+\texttt{frame\_idx} & {\footnotesize\texttt{int}} & không & UQ & Chỉ số khung hình trong video gốc (dùng khi trích đoạn) \\
+\end{longtable}
+
+\textbf{Bảng \texttt{ocr\_texts}} -- Chữ nhận dạng được trên khung hình (OCR).
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{ocr\_texts}}\label{tab:col_ocr_texts}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{keyframe\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ keyframes & Khung hình chứa chữ \\
+\texttt{ocr\_text} & {\footnotesize\texttt{nvarchar(2000)}} & không &  & Chữ nhận dạng được \\
+\texttt{text\_folded} & {\footnotesize\texttt{tính toán}} & có &  & Chữ đã bỏ dấu, viết thường (cột tính toán) \\
+\end{longtable}
+
+\textbf{Bảng \texttt{asr\_segments}} -- Đoạn lời nói nhận dạng được (ASR) theo khoảng thời gian.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{asr\_segments}}\label{tab:col_asr_segments}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{segment\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã đoạn lời nói (tự tăng) \\
+\texttt{video\_id} & {\footnotesize\texttt{varchar(16)}} & không & FK $\rightarrow$ videos & Video chứa đoạn lời nói \\
+\texttt{start\_sec} & {\footnotesize\texttt{decimal(10,3)}} & không &  & Thời điểm bắt đầu (giây) \\
+\texttt{end\_sec} & {\footnotesize\texttt{decimal(10,3)}} & không &  & Thời điểm kết thúc (giây) \\
+\texttt{asr\_text} & {\footnotesize\texttt{nvarchar(2000)}} & không &  & Lời nói nhận dạng được \\
+\texttt{text\_folded} & {\footnotesize\texttt{tính toán}} & có &  & Lời nói đã bỏ dấu (cột tính toán) \\
+\end{longtable}
+
+\subsection{Nhóm chỉ mục văn bản}
+
+\textbf{Bảng \texttt{stopwords}} -- Hư từ bị bỏ qua khi tách từ.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{stopwords}}\label{tab:col_stopwords}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{word} & {\footnotesize\texttt{nvarchar(32)}} & không & PK & Hư từ đã bỏ dấu \\
+\end{longtable}
+
+\textbf{Bảng \texttt{terms}} -- Từ điển các từ khoá đã bỏ dấu.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{terms}}\label{tab:col_terms}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{term\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã từ khoá (tự tăng) \\
+\texttt{term} & {\footnotesize\texttt{nvarchar(64)}} & không & UQ & Từ khoá đã bỏ dấu, so khớp nhị phân \\
+\end{longtable}
+
+\textbf{Bảng \texttt{ocr\_postings}} -- Chỉ mục ngược: từ khoá xuất hiện ở khung hình nào.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{ocr\_postings}}\label{tab:col_ocr_postings}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{term\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ terms & Từ khoá \\
+\texttt{keyframe\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ ocr\_texts & Khung hình có từ khoá trong chữ OCR \\
+\end{longtable}
+
+\textbf{Bảng \texttt{asr\_postings}} -- Chỉ mục ngược: từ khoá xuất hiện ở đoạn lời nói nào.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{asr\_postings}}\label{tab:col_asr_postings}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{term\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ terms & Từ khoá \\
+\texttt{segment\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ asr\_segments & Đoạn lời nói có từ khoá \\
+\end{longtable}
+
+\subsection{Nhóm tài khoản và phân quyền}
+
+\textbf{Bảng \texttt{users}} -- Tài khoản đăng nhập: bạn đọc và cán bộ thư viện.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{users}}\label{tab:col_users}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{user\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã người dùng (tự tăng) \\
+\texttt{username} & {\footnotesize\texttt{varchar(32)}} & không & UQ & Tên đăng nhập: 3--32 ký tự a-z, 0-9, \_ . - \\
+\texttt{full\_name} & {\footnotesize\texttt{nvarchar(100)}} & không & DF N'' & Họ tên hiển thị \\
+\texttt{password\_hash} & {\footnotesize\texttt{varchar(255)}} & không &  & Mật khẩu băm scrypt (kèm muối) \\
+\texttt{organization\_id} & {\footnotesize\texttt{smallint}} & có & FK $\rightarrow$ organizations & Đơn vị công tác (NULL: bạn đọc cá nhân) \\
+\texttt{user\_type} & {\footnotesize\texttt{varchar(16)}} & không & DF 'other' & Đối tượng: staff, journalist, researcher, student, other \\
+\texttt{is\_active} & {\footnotesize\texttt{bit}} & không & DF 1 & Tài khoản còn hoạt động \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm tạo \\
+\texttt{last\_login\_at} & {\footnotesize\texttt{datetime2(0)}} & có &  & Lần đăng nhập gần nhất \\
+\end{longtable}
+
+\textbf{Bảng \texttt{roles}} -- Vai trò (reader, librarian, admin).
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{roles}}\label{tab:col_roles}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{role\_id} & {\footnotesize\texttt{tinyint}} & không & PK, IDENTITY & Mã vai trò (tự tăng) \\
+\texttt{role\_name} & {\footnotesize\texttt{varchar(32)}} & không & UQ & Tên vai trò: reader, librarian, admin \\
+\texttt{description} & {\footnotesize\texttt{nvarchar(255)}} & không & DF N'' & Mô tả \\
+\end{longtable}
+
+\textbf{Bảng \texttt{permissions}} -- Quyền nghiệp vụ.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{permissions}}\label{tab:col_permissions}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{permission\_code} & {\footnotesize\texttt{varchar(32)}} & không & PK & Mã quyền, vd. selection.write \\
+\texttt{description} & {\footnotesize\texttt{nvarchar(255)}} & không & DF N'' & Mô tả \\
+\end{longtable}
+
+\textbf{Bảng \texttt{user\_roles}} -- Quan hệ nhiều--nhiều giữa người dùng và vai trò.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{user\_roles}}\label{tab:col_user_roles}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{user\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ users & Người dùng \\
+\texttt{role\_id} & {\footnotesize\texttt{tinyint}} & không & PK, FK $\rightarrow$ roles & Vai trò được gán \\
+\end{longtable}
+
+\textbf{Bảng \texttt{role\_permissions}} -- Quan hệ nhiều--nhiều giữa vai trò và quyền.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{role\_permissions}}\label{tab:col_role_permissions}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{role\_id} & {\footnotesize\texttt{tinyint}} & không & PK, FK $\rightarrow$ roles & Vai trò \\
+\texttt{permission\_code} & {\footnotesize\texttt{varchar(32)}} & không & PK, FK $\rightarrow$ permissions & Quyền của vai trò \\
+\end{longtable}
+
+\textbf{Bảng \texttt{sessions}} -- Phiên đăng nhập (chỉ lưu băm của cookie).
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{sessions}}\label{tab:col_sessions}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{session\_hash} & {\footnotesize\texttt{char(64)}} & không & PK & SHA-256 của cookie đăng nhập \\
+\texttt{user\_id} & {\footnotesize\texttt{int}} & không & FK $\rightarrow$ users & Chủ phiên \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm đăng nhập \\
+\texttt{expires\_at} & {\footnotesize\texttt{datetime2(0)}} & không &  & Thời điểm hết hạn \\
+\end{longtable}
+
+\subsection{Nhóm yêu cầu khai thác và cấp phép}
+
+\textbf{Bảng \texttt{requests}} -- Yêu cầu khai thác: bạn đọc mô tả đoạn tư liệu cần dùng, mục đích và trạng thái xử lý.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{requests}}\label{tab:col_requests}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{request\_id} & {\footnotesize\texttt{varchar(32)}} & không & PK & Mã yêu cầu, vd. YC-047, YC-U0001 \\
+\texttt{request\_text} & {\footnotesize\texttt{nvarchar(2000)}} & không &  & Mô tả đoạn tư liệu cần dùng \\
+\texttt{origin} & {\footnotesize\texttt{varchar(16)}} & không &  & Nguồn: sample (mẫu đã xác minh) hoặc user (gửi qua web) \\
+\texttt{requested\_by} & {\footnotesize\texttt{int}} & không & FK $\rightarrow$ users & Bạn đọc gửi yêu cầu \\
+\texttt{purpose} & {\footnotesize\texttt{varchar(16)}} & không & DF 'research' & Mục đích: broadcast, research, education, exhibition \\
+\texttt{status} & {\footnotesize\texttt{varchar(16)}} & không & DF 'pending' & pending, approved, rejected; chỉ đổi qua thủ tục \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm gửi \\
+\end{longtable}
+
+\textbf{Bảng \texttt{ground\_truth}} -- Vị trí đúng (xác minh thủ công) của đoạn tư liệu mà yêu cầu mẫu cần tìm.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{ground\_truth}}\label{tab:col_ground_truth}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{request\_id} & {\footnotesize\texttt{varchar(32)}} & không & PK, FK $\rightarrow$ requests & Yêu cầu mẫu \\
+\texttt{video\_id} & {\footnotesize\texttt{varchar(16)}} & không & FK $\rightarrow$ videos & Video chứa cảnh đúng \\
+\texttt{start\_sec} & {\footnotesize\texttt{decimal(10,3)}} & không &  & Bắt đầu khoảng thời gian đúng (giây) \\
+\texttt{end\_sec} & {\footnotesize\texttt{decimal(10,3)}} & không &  & Kết thúc khoảng thời gian đúng (giây) \\
+\end{longtable}
+
+\textbf{Bảng \texttt{selections}} -- Đoạn tư liệu (khung hình) cán bộ thư viện chọn cho một yêu cầu.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{selections}}\label{tab:col_selections}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{selection\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã lựa chọn (tự tăng) \\
+\texttt{request\_id} & {\footnotesize\texttt{varchar(32)}} & không & UQ, FK $\rightarrow$ requests & Yêu cầu khai thác \\
+\texttt{keyframe\_id} & {\footnotesize\texttt{int}} & không & UQ, FK $\rightarrow$ keyframes & Đoạn tư liệu (khung hình) được chọn \\
+\texttt{user\_id} & {\footnotesize\texttt{int}} & có & FK $\rightarrow$ users & Người chọn (NULL nếu tài khoản đã bị xoá) \\
+\texttt{note} & {\footnotesize\texttt{nvarchar(255)}} & không & DF N'' & Ghi chú \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm chọn; quyết định thứ tự trong danh sách xuất \\
+\end{longtable}
+
+\textbf{Bảng \texttt{usage\_licenses}} -- Giấy phép sử dụng cấp cho một yêu cầu đã duyệt.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{usage\_licenses}}\label{tab:col_usage_licenses}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{license\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã giấy phép (tự tăng) \\
+\texttt{request\_id} & {\footnotesize\texttt{varchar(32)}} & không & UQ, FK $\rightarrow$ requests & Yêu cầu được cấp phép (duy nhất) \\
+\texttt{licensee\_org\_id} & {\footnotesize\texttt{smallint}} & có & FK $\rightarrow$ organizations & Đơn vị được cấp phép tại thời điểm cấp (NULL: cá nhân) \\
+\texttt{granted\_by} & {\footnotesize\texttt{int}} & không & FK $\rightarrow$ users & Cán bộ cấp phép \\
+\texttt{granted\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm cấp \\
+\texttt{valid\_from} & {\footnotesize\texttt{date}} & không &  & Ngày bắt đầu hiệu lực \\
+\texttt{valid\_to} & {\footnotesize\texttt{date}} & không &  & Ngày hết hiệu lực (sau valid\_from) \\
+\texttt{conditions} & {\footnotesize\texttt{nvarchar(500)}} & không & DF N'' & Điều kiện sử dụng \\
+\end{longtable}
+
+\subsection{Nhóm nhật ký và đánh giá}
+
+\textbf{Bảng \texttt{sources}} -- Danh mục nguồn tìm kiếm (visual, ocr, asr).
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{sources}}\label{tab:col_sources}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{source\_code} & {\footnotesize\texttt{varchar(16)}} & không & PK & Mã nguồn: visual, ocr, asr \\
+\texttt{description} & {\footnotesize\texttt{nvarchar(100)}} & không & DF N'' & Mô tả \\
+\end{longtable}
+
+\textbf{Bảng \texttt{audit\_log}} -- Nhật ký thao tác, do trigger và ứng dụng ghi.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{audit\_log}}\label{tab:col_audit_log}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{log\_id} & {\footnotesize\texttt{bigint}} & không & PK, IDENTITY & Mã dòng nhật ký (tự tăng) \\
+\texttt{user\_id} & {\footnotesize\texttt{int}} & có & FK $\rightarrow$ users & Người thực hiện \\
+\texttt{action} & {\footnotesize\texttt{varchar(32)}} & không &  & Hành động, vd. selection.add, request.approve \\
+\texttt{detail} & {\footnotesize\texttt{nvarchar(500)}} & không & DF N'' & Chi tiết dạng văn bản \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm \\
+\end{longtable}
+
+\textbf{Bảng \texttt{search\_log}} -- Nhật ký các lượt tìm kiếm và độ trễ.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{search\_log}}\label{tab:col_search_log}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{search\_id} & {\footnotesize\texttt{bigint}} & không & PK, IDENTITY & Mã lượt tìm (tự tăng) \\
+\texttt{user\_id} & {\footnotesize\texttt{int}} & có & FK $\rightarrow$ users & Người tìm \\
+\texttt{request\_text} & {\footnotesize\texttt{nvarchar(2000)}} & không &  & Nội dung tìm \\
+\texttt{top\_k} & {\footnotesize\texttt{smallint}} & không &  & Số kết quả yêu cầu \\
+\texttt{result\_count} & {\footnotesize\texttt{smallint}} & không &  & Số kết quả trả về \\
+\texttt{latency\_ms} & {\footnotesize\texttt{int}} & không &  & Thời gian xử lý (ms) \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm \\
+\end{longtable}
+
+\textbf{Bảng \texttt{search\_log\_sources}} -- Nguồn được dùng trong mỗi lượt tìm kiếm.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{search\_log\_sources}}\label{tab:col_search_log_sources}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{search\_id} & {\footnotesize\texttt{bigint}} & không & PK, FK $\rightarrow$ search\_log & Lượt tìm \\
+\texttt{source\_code} & {\footnotesize\texttt{varchar(16)}} & không & PK, FK $\rightarrow$ sources & Nguồn được dùng \\
+\end{longtable}
+
+\textbf{Bảng \texttt{eval\_runs}} -- Lượt đánh giá trên tập yêu cầu mẫu đã xác minh.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{eval\_runs}}\label{tab:col_eval_runs}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{run\_id} & {\footnotesize\texttt{int}} & không & PK, IDENTITY & Mã lượt đánh giá (tự tăng) \\
+\texttt{run\_name} & {\footnotesize\texttt{nvarchar(64)}} & không &  & Tên lượt \\
+\texttt{top\_k} & {\footnotesize\texttt{smallint}} & không &  & Số kết quả xét cho mỗi yêu cầu \\
+\texttt{tolerance\_sec} & {\footnotesize\texttt{decimal(5,2)}} & không & DF 3.0 & Sai lệch thời gian cho phép (giây) \\
+\texttt{created\_at} & {\footnotesize\texttt{datetime2(0)}} & không & DF sysdatetime() & Thời điểm chạy \\
+\end{longtable}
+
+\textbf{Bảng \texttt{eval\_run\_sources}} -- Nguồn được dùng trong mỗi lượt đánh giá.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{eval\_run\_sources}}\label{tab:col_eval_run_sources}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{run\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ eval\_runs & Lượt đánh giá \\
+\texttt{source\_code} & {\footnotesize\texttt{varchar(16)}} & không & PK, FK $\rightarrow$ sources & Nguồn được dùng \\
+\end{longtable}
+
+\textbf{Bảng \texttt{eval\_requests}} -- Từng yêu cầu được chạy trong một lượt đánh giá và độ trễ.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{eval\_requests}}\label{tab:col_eval_requests}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{run\_id} & {\footnotesize\texttt{int}} & không & PK, FK $\rightarrow$ eval\_runs & Lượt đánh giá \\
+\texttt{request\_id} & {\footnotesize\texttt{varchar(32)}} & không & PK, FK $\rightarrow$ ground\_truth & Yêu cầu mẫu được chạy \\
+\texttt{latency\_ms} & {\footnotesize\texttt{int}} & không &  & Thời gian xử lý (ms) \\
+\end{longtable}
+
+\textbf{Bảng \texttt{eval\_results}} -- Danh sách kết quả xếp hạng của từng yêu cầu trong lượt đánh giá.
+
+\setlength{\tabcolsep}{4pt}
+\begin{longtable}{>{\raggedright\arraybackslash}p{0.21\textwidth}>{\raggedright\arraybackslash}p{0.19\textwidth}>{\centering\arraybackslash}p{0.07\textwidth}>{\raggedright\arraybackslash}p{0.17\textwidth}>{\raggedright\arraybackslash}p{0.26\textwidth}}
+\caption{Cấu trúc bảng \texttt{eval\_results}}\label{tab:col_eval_results}\\
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endfirsthead
+\toprule \textbf{Cột} & \textbf{Kiểu} & \textbf{Null} & \textbf{Khoá / mặc định} & \textbf{Mô tả} \\ \midrule \endhead
+\bottomrule \endfoot
+\texttt{run\_id} & {\footnotesize\texttt{int}} & không & PK, UQ, FK $\rightarrow$ eval\_requests & Lượt đánh giá \\
+\texttt{request\_id} & {\footnotesize\texttt{varchar(32)}} & không & PK, UQ, FK $\rightarrow$ eval\_requests & Yêu cầu được chạy \\
+\texttt{rank\_no} & {\footnotesize\texttt{smallint}} & không & PK & Thứ hạng của kết quả \\
+\texttt{keyframe\_id} & {\footnotesize\texttt{int}} & không & UQ, FK $\rightarrow$ keyframes & Khung hình được trả về \\
+\end{longtable}

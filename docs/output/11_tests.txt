@@ -1,0 +1,136 @@
+﻿== A. Ràng buộc toàn vẹn ==
+PK       -> lỗi 2627: Violation of PRIMARY KEY constraint 'PK_videos'. Cannot insert duplicate key in object 'dbo.videos'. The duplicate key value is (L23_V001).
+UNIQUE   -> lỗi 2627: Violation of UNIQUE KEY constraint 'UQ_keyframes_video_n'. Cannot insert duplicate key in object 'dbo.keyframes'. The duplicate key value is (L23_V001, 1).
+FK       -> lỗi 547: The INSERT statement conflicted with the FOREIGN KEY constraint "FK_keyframes_video". The conflict occurred in database "video_archive", table "dbo.videos", column 'video_id'.
+FK       -> lỗi 547: The DELETE statement conflicted with the REFERENCE constraint "FK_requests_user". The conflict occurred in database "video_archive", table "dbo.requests", column 'requested_by'.
+FK       -> lỗi 547: The DELETE statement conflicted with the REFERENCE constraint "FK_usage_licenses_request". The conflict occurred in database "video_archive", table "dbo.usage_licenses", column 'request_id'.
+FK       -> lỗi 547: The INSERT statement conflicted with the FOREIGN KEY SAME TABLE constraint "FK_topics_parent". The conflict occurred in database "video_archive", table "dbo.topics", column 'topic_id'.
+NOT NULL -> lỗi 515: Cannot insert the value NULL into column 'request_text', table 'video_archive.dbo.requests'; column does not allow nulls. INSERT fails.
+CHECK    -> lỗi 547: The INSERT statement conflicted with the CHECK constraint "CK_users_username". The conflict occurred in database "video_archive", table "dbo.users", column 'username'.
+CHECK    -> lỗi 547: The INSERT statement conflicted with the CHECK constraint "CK_asr_segments_span". The conflict occurred in database "video_archive", table "dbo.asr_segments".
+CHECK    -> lỗi 547: The UPDATE statement conflicted with the CHECK constraint "CK_requests_purpose". The conflict occurred in database "video_archive", table "dbo.requests", column 'purpose'.
+CHECK    -> lỗi 547: The UPDATE statement conflicted with the CHECK constraint "CK_usage_licenses_period". The conflict occurred in database "video_archive", table "dbo.usage_licenses".
+VIEW CHECK OPTION -> lỗi 550: The attempted insert or update failed because the target view either specifies WITH CHECK OPTION or spans a view that specifies WITH CHECK OPTION and one or more rows resulting from the operation did not qualify under the CHECK OPTION constraint.
+username|full_name|is_active|created_at
+--------|---------|---------|----------
+default_demo||1|2026-10-12 21:20:35
+DEFAULT  -> full_name = N'', is_active = 1, created_at = SYSDATETIME() (đã rollback)
+== B. Giao dịch ==
+B1. Trong giao dịch: 61 đoạn đã chọn
+B1. Sau ROLLBACK:    60 đoạn đã chọn (trước đó 60)
+B2. sp_create_user lỗi 50002: Vai trò không tồn tại.
+B2. Số tài khoản atomic_demo: 0
+user_id
+-------
+9
+username|roles
+--------|-----
+tx_demo|librarian, reader
+B3. Sau ROLLBACK, số tài khoản tx_demo: 0
+license_id
+----------
+31
+request_id|status|valid_from|valid_to
+----------|------|----------|--------
+YC-003|approved|2026-10-12|2027-01-10
+B4. Sau ROLLBACK, YC-003 trở lại trạng thái pending, số giấy phép: 0
+B5. sp_grant_license YC-004 -> lỗi 50006: Chưa chọn đoạn tư liệu nào cho yêu cầu.
+B5. YC-004 vẫn pending, số giấy phép: 0
+== C. Phân quyền ==
+C1. archive_report đọc được 5913 khung hình
+C1. archive_report INSERT -> lỗi 229: The INSERT permission was denied on the object 'audit_log', database 'video_archive', schema 'dbo'.
+C1. archive_report EXEC sp_add_selection -> lỗi 229: The EXECUTE permission was denied on the object 'sp_add_selection', database 'video_archive', schema 'dbo'.
+C1. archive_report EXEC sp_grant_license -> lỗi 229: The EXECUTE permission was denied on the object 'sp_grant_license', database 'video_archive', schema 'dbo'.
+C2. archive_app DELETE keyframes -> lỗi 229: The DELETE permission was denied on the object 'keyframes', database 'video_archive', schema 'dbo'.
+C2. archive_app ALTER TABLE -> lỗi 1088: Cannot find the object "users" because it does not exist or you do not have permissions.
+C2. archive_app UPDATE requests -> lỗi 229: The UPDATE permission was denied on the object 'requests', database 'video_archive', schema 'dbo'.
+C3. bandoc1 sp_add_selection -> lỗi 50001: Không có quyền selection.write.
+C3. bandoc1 sp_grant_license -> lỗi 50001: Không có quyền license.grant.
+C4. thuthu1 sp_add_selection YC-001 (approved) -> lỗi 50005: Yêu cầu đã được xử lý, không sửa danh sách đoạn tư liệu.
+== D. Chỉ mục ==
+D1a. Qua chỉ mục ngược terms/ocr_postings:
+frames
+------
+237
+Table 'ocr_postings'. Scan count 1, logical reads 2, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'terms'. Scan count 0, logical reads 2, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+D1b. LIKE quét toàn bảng:
+frames
+------
+442
+Table 'ocr_texts'. Scan count 1, logical reads 43, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+D2a. Dùng chỉ mục (video_id, pts_time):
+keyframe_id|pts_time
+-----------|--------
+65450|98.680
+Table 'keyframes'. Scan count 1, logical reads 2, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+D2b. Bọc cột trong hàm, phải quét bảng:
+keyframe_id|pts_time
+-----------|--------
+65450|98.680
+Table 'keyframes'. Scan count 1, logical reads 26, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+table_name|index_name|type_desc|is_unique|is_primary_key
+----------|----------|---------|---------|--------------
+asr_postings|PK_asr_postings|CLUSTERED|1|1
+asr_segments|IX_asr_segments_video_time|NONCLUSTERED|0|0
+asr_segments|PK_asr_segments|CLUSTERED|1|1
+audit_log|IX_audit_log_created|NONCLUSTERED|0|0
+audit_log|PK_audit_log|CLUSTERED|1|1
+collections|IX_collections_organization|NONCLUSTERED|0|0
+collections|PK_collections|CLUSTERED|1|1
+collections|UQ_collections_code|NONCLUSTERED|1|0
+eval_requests|PK_eval_requests|CLUSTERED|1|1
+eval_results|PK_eval_results|CLUSTERED|1|1
+eval_results|UQ_eval_results_frame|NONCLUSTERED|1|0
+eval_run_sources|PK_eval_run_sources|CLUSTERED|1|1
+eval_runs|PK_eval_runs|CLUSTERED|1|1
+ground_truth|PK_ground_truth|CLUSTERED|1|1
+keyframes|PK_keyframes|CLUSTERED|1|1
+keyframes|UQ_keyframes_video_frame|NONCLUSTERED|1|0
+keyframes|UQ_keyframes_video_n|NONCLUSTERED|1|0
+keyframes|UQ_keyframes_video_time|NONCLUSTERED|1|0
+ocr_postings|PK_ocr_postings|CLUSTERED|1|1
+ocr_texts|PK_ocr_texts|CLUSTERED|1|1
+organizations|PK_organizations|CLUSTERED|1|1
+organizations|UQ_organizations_code|NONCLUSTERED|1|0
+organizations|UQ_organizations_name|NONCLUSTERED|1|0
+permissions|PK_permissions|CLUSTERED|1|1
+requests|IX_requests_status|NONCLUSTERED|0|0
+requests|IX_requests_user|NONCLUSTERED|0|0
+requests|PK_requests|CLUSTERED|1|1
+role_permissions|PK_role_permissions|CLUSTERED|1|1
+roles|PK_roles|CLUSTERED|1|1
+roles|UQ_roles_name|NONCLUSTERED|1|0
+search_log|PK_search_log|CLUSTERED|1|1
+search_log_sources|PK_search_log_sources|CLUSTERED|1|1
+selections|PK_selections|CLUSTERED|1|1
+selections|UQ_selections_request_frame|NONCLUSTERED|1|0
+sessions|IX_sessions_expires|NONCLUSTERED|0|0
+sessions|PK_sessions|CLUSTERED|1|1
+sources|PK_sources|CLUSTERED|1|1
+stopwords|PK_stopwords|CLUSTERED|1|1
+terms|PK_terms|CLUSTERED|1|1
+terms|UQ_terms_term|NONCLUSTERED|1|0
+topics|IX_topics_parent|NONCLUSTERED|0|0
+topics|PK_topics|CLUSTERED|1|1
+topics|UQ_topics_name|NONCLUSTERED|1|0
+usage_licenses|IX_usage_licenses_valid_to|NONCLUSTERED|0|0
+usage_licenses|PK_usage_licenses|CLUSTERED|1|1
+usage_licenses|UQ_usage_licenses_request|NONCLUSTERED|1|0
+user_roles|PK_user_roles|CLUSTERED|1|1
+users|IX_users_organization|NONCLUSTERED|0|0
+users|PK_users|CLUSTERED|1|1
+users|UQ_users_username|NONCLUSTERED|1|0
+video_topics|IX_video_topics_topic|NONCLUSTERED|0|0
+video_topics|PK_video_topics|CLUSTERED|1|1
+videos|IX_videos_batch|NONCLUSTERED|0|0
+videos|IX_videos_collection|NONCLUSTERED|0|0
+videos|PK_videos|CLUSTERED|1|1
+== E1. Kiểm tra nhất quán pts_time = frame_idx / fps ==
+keyframes|mismatches|max_diff_sec
+---------|----------|------------
+5913|0|.0000000
+== E2. Kiểm tra nhất quán status = approved <=> có giấy phép ==
+requests|mismatches
+--------|----------
+120|0

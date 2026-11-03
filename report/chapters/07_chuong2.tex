@@ -1,0 +1,441 @@
+\chapter{THIẾT KẾ CƠ SỞ DỮ LIỆU}
+
+\section{Thực thể và mối quan hệ}
+
+Từ phân tích ở Chương 1, cơ sở dữ liệu được chia thành sáu nhóm với 30 bảng
+(Bảng~\ref{tab:groups}). Ngoài tám bảng nhật ký và đánh giá, có 22 bảng chính, vượt yêu cầu
+tối thiểu 6 bảng của đề bài.
+
+\begin{table}[H]
+\centering
+\caption{Các nhóm bảng trong cơ sở dữ liệu \texttt{video\_archive}}
+\label{tab:groups}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.8cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Nhóm} & \textbf{Bảng} \\
+\midrule
+Danh mục thư viện & \texttt{organizations}, \texttt{collections}, \texttt{topics}, \texttt{video\_topics} \\
+Kho dữ liệu video & \texttt{videos}, \texttt{keyframes}, \texttt{ocr\_texts}, \texttt{asr\_segments} \\
+Chỉ mục văn bản & \texttt{stopwords}, \texttt{terms}, \texttt{ocr\_postings}, \texttt{asr\_postings} \\
+Tài khoản và phân quyền & \texttt{users}, \texttt{roles}, \texttt{permissions}, \texttt{user\_roles}, \texttt{role\_permissions}, \texttt{sessions} \\
+Yêu cầu khai thác và cấp phép & \texttt{requests}, \texttt{ground\_truth}, \texttt{selections}, \texttt{usage\_licenses} \\
+Nhật ký và đánh giá & \texttt{sources}, \texttt{audit\_log}, \texttt{search\_log}, \texttt{search\_log\_sources}, \texttt{eval\_runs}, \texttt{eval\_run\_sources}, \texttt{eval\_requests}, \texttt{eval\_results} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Các mối quan hệ chính và bản số của chúng được liệt kê ở Bảng~\ref{tab:relations}.
+Quan hệ nhiều--nhiều được tách thành bảng trung gian có khoá chính ghép.
+
+{\renewcommand{\arraystretch}{1.15}
+\begin{longtable}{>{\raggedright\arraybackslash}p{5.4cm} >{\centering\arraybackslash}p{1.4cm} >{\raggedright\arraybackslash}p{7.0cm}}
+\caption{Các mối quan hệ chính}\label{tab:relations}\\
+\toprule \textbf{Quan hệ} & \textbf{Bản số} & \textbf{Ý nghĩa} \\ \midrule \endfirsthead
+\toprule \textbf{Quan hệ} & \textbf{Bản số} & \textbf{Ý nghĩa} \\ \midrule \endhead
+\bottomrule \endfoot
+organizations -- collections & 1 : N & Một đơn vị đóng góp nhiều bộ sưu tập \\
+collections -- videos & 1 : N & Một bộ sưu tập có nhiều video; video thuộc đúng một bộ sưu tập \\
+topics -- topics & 1 : N & Quan hệ đệ quy: chủ đề cha có nhiều chủ đề con \\
+videos -- topics (qua video\_topics) & N : N & Một video có nhiều chủ đề, một chủ đề gắn cho nhiều video \\
+videos -- keyframes & 1 : N & Một video có nhiều khung hình \\
+keyframes -- ocr\_texts & 1 : 0..1 & Một khung hình có thể có chữ \\
+videos -- asr\_segments & 1 : N & Một video có nhiều đoạn lời nói \\
+terms -- keyframes (qua ocr\_postings) & N : N & Từ khoá xuất hiện ở nhiều khung hình \\
+terms -- asr\_segments (qua asr\_postings) & N : N & Từ khoá xuất hiện ở nhiều đoạn lời nói \\
+organizations -- users & 1 : N & Bạn đọc, cán bộ thuộc một đơn vị (hoặc là cá nhân) \\
+users -- requests & 1 : N & Một bạn đọc gửi nhiều yêu cầu khai thác \\
+requests -- keyframes (qua selections) & N : N & Một yêu cầu có nhiều đoạn tư liệu, một khung hình dùng cho nhiều yêu cầu \\
+requests -- usage\_licenses & 1 : 0..1 & Yêu cầu được duyệt có đúng một giấy phép \\
+organizations -- usage\_licenses & 1 : N & Đơn vị được cấp phép \\
+users -- usage\_licenses & 1 : N & Cán bộ cấp phép \\
+requests -- ground\_truth & 1 : 0..1 & Chỉ yêu cầu mẫu mới có vị trí đã xác minh \\
+users -- roles (qua user\_roles) & N : N & Một người có nhiều vai trò \\
+roles -- permissions (qua role\_permissions) & N : N & Một vai trò có nhiều quyền \\
+users -- sessions & 1 : N & Một người có nhiều phiên đăng nhập \\
+search\_log / eval\_runs -- sources & N : N & Một lượt tìm/đánh giá dùng nhiều nguồn \\
+eval\_runs -- eval\_requests -- eval\_results & 1 : N : N & Lượt đánh giá $\rightarrow$ yêu cầu $\rightarrow$ kết quả xếp hạng \\
+\end{longtable}}
+
+\section{Sơ đồ thực thể -- liên kết}
+
+Do có 30 bảng, sơ đồ ERD được tách theo nhóm (Hình~\ref{fig:erd_catalog}--\ref{fig:erd_logs}).
+Thuộc tính gạch chân là khoá chính, \textit{(FK)} là khoá ngoại, \textit{(UQ)} là duy nhất;
+khung nét đứt là bảng thuộc nhóm khác, chỉ vẽ lại để thấy liên kết. Nhãn trên đường nối là
+bản số.
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}
+\node[entity] (org) at (0,0) {\textbf{organizations}\nodepart{second}\attrs{\pk{organization\_id} \\ org\_code (UQ) \\ org\_name (UQ) \\ org\_type \\ created\_at}};
+\node[entity] (col) at (5,0) {\textbf{collections}\nodepart{second}\attrs{\pk{collection\_id} \\ collection\_code (UQ) \\ title \\ organization\_id (FK) \\ access\_level \\ description, created\_at}};
+\node[entity] (vid) at (10,0) {\textbf{videos}\nodepart{second}\attrs{\pk{video\_id} \\ batch (tính toán) \\ collection\_id (FK) \\ title \\ fps}};
+\node[entity] (vt) at (10,-4.6) {\textbf{video\_topics}\nodepart{second}\attrs{\pk{video\_id} (FK) \\ \pk{topic\_id} (FK)}};
+\node[entity] (top) at (5,-4.6) {\textbf{topics}\nodepart{second}\attrs{\pk{topic\_id} \\ topic\_name (UQ) \\ parent\_topic\_id (FK)}};
+\node[refentity] (kf) at (14.6,0) {\textbf{keyframes}\nodepart{second}\attrs{\pk{keyframe\_id} \\ video\_id (FK) \\ \dots}};
+\draw[rel] (org) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (col);
+\draw[rel] (col) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (vid);
+\draw[rel] (vid) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (vt);
+\draw[rel] (top) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (vt);
+\draw[rel] (vid) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (kf);
+\draw[rel] (top.west) to[out=180, in=-90, looseness=1.4] node[card, pos=0.15]{N}
+    ($(top.west)+(-1.6,0)$) to[out=90, in=150, looseness=1.4] node[card, pos=0.85]{1} (top.north west);
+\node[font=\scriptsize\itshape, align=center] at ($(top.west)+(-2.4,0)$) {cha --\\con};
+\end{tikzpicture}}
+\caption{ERD nhóm danh mục thư viện}
+\label{fig:erd_catalog}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}
+\node[refentity] (videos) at (0,0) {\textbf{videos}\nodepart{second}\attrs{\pk{video\_id} \\ \dots}};
+\node[entity] (keyframes) at (4.4,0) {\textbf{keyframes}\nodepart{second}\attrs{\pk{keyframe\_id} \\ video\_id (FK) \\ sample\_n \\ pts\_time \\ frame\_idx}};
+\node[entity] (ocr) at (8.8,0) {\textbf{ocr\_texts}\nodepart{second}\attrs{\pk{keyframe\_id} (FK) \\ ocr\_text \\ text\_folded (tính toán)}};
+\node[entity] (ocrp) at (13.2,0) {\textbf{ocr\_postings}\nodepart{second}\attrs{\pk{term\_id} (FK) \\ \pk{keyframe\_id} (FK)}};
+\node[entity] (asr) at (0,-4.2) {\textbf{asr\_segments}\nodepart{second}\attrs{\pk{segment\_id} \\ video\_id (FK) \\ start\_sec, end\_sec \\ asr\_text \\ text\_folded (tính toán)}};
+\node[entity] (asrp) at (4.4,-4.2) {\textbf{asr\_postings}\nodepart{second}\attrs{\pk{term\_id} (FK) \\ \pk{segment\_id} (FK)}};
+\node[entity] (terms) at (8.8,-4.2) {\textbf{terms}\nodepart{second}\attrs{\pk{term\_id} \\ term (UQ)}};
+\node[entity] (stop) at (13.2,-4.2) {\textbf{stopwords}\nodepart{second}\attrs{\pk{word}}};
+\draw[rel] (videos) -- node[card, pos=0.18]{1} node[card, pos=0.82]{N} (keyframes);
+\draw[rel] (keyframes) -- node[card, pos=0.2]{1} node[card, pos=0.8]{0..1} (ocr);
+\draw[rel] (ocr) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (ocrp);
+\draw[rel] (videos) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (asr);
+\draw[rel] (asr) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (asrp);
+\draw[rel] (terms) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (asrp);
+\draw[rel] (terms) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (ocrp);
+\end{tikzpicture}}
+\caption{ERD nhóm kho dữ liệu video và chỉ mục văn bản}
+\label{fig:erd_corpus}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tikzpicture}
+\node[entity] (gt) at (-5.4,0) {\textbf{ground\_truth}\nodepart{second}\attrs{\pk{request\_id} (FK) \\ video\_id (FK) \\ start\_sec, end\_sec}};
+\node[entity] (q) at (0,0) {\textbf{requests}\nodepart{second}\attrs{\pk{request\_id} \\ request\_text \\ origin \\ requested\_by (FK) \\ purpose \\ status \\ created\_at}};
+\node[entity] (a) at (5.4,0) {\textbf{selections}\nodepart{second}\attrs{\pk{selection\_id} \\ request\_id (FK) \\ keyframe\_id (FK) \\ user\_id (FK) \\ note, created\_at}};
+\node[refentity] (k) at (10.4,0) {\textbf{keyframes}\nodepart{second}\attrs{\pk{keyframe\_id} \\ \dots}};
+\node[refentity] (v) at (-5.4,-6) {\textbf{videos}\nodepart{second}\attrs{\pk{video\_id} \\ \dots}};
+\node[entity] (l) at (0,-6) {\textbf{usage\_licenses}\nodepart{second}\attrs{\pk{license\_id} \\ request\_id (FK, UQ) \\ licensee\_org\_id (FK) \\ granted\_by (FK) \\ granted\_at \\ valid\_from, valid\_to \\ conditions}};
+\node[refentity] (u) at (5.4,-6) {\textbf{users}\nodepart{second}\attrs{\pk{user\_id} \\ \dots}};
+\node[refentity] (o) at (0,-11.4) {\textbf{organizations}\nodepart{second}\attrs{\pk{organization\_id} \\ \dots}};
+\draw[rel] (q) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (a);
+\draw[rel] (k) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (a);
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (a);
+\draw[rel] (q) -- node[card, pos=0.2]{1} node[card, pos=0.8]{0..1} (gt);
+\draw[rel] (v) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (gt);
+\draw[rel] (q) -- node[card, pos=0.2]{1} node[card, pos=0.8]{0..1} (l);
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} node[font=\scriptsize\itshape, above, pos=0.5]{cấp phép} (l);
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} node[font=\scriptsize\itshape, sloped, above, pos=0.45]{gửi yêu cầu} (q);
+\draw[rel] (o) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (l);
+\end{tikzpicture}}
+\caption{ERD nhóm yêu cầu khai thác và cấp phép}
+\label{fig:erd_requests}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}
+\node[entity] (u) at (0,0) {\textbf{users}\nodepart{second}\attrs{\pk{user\_id} \\ username (UQ) \\ full\_name \\ password\_hash \\ organization\_id (FK) \\ user\_type \\ is\_active \\ created\_at, last\_login\_at}};
+\node[entity] (ur) at (4.5,0) {\textbf{user\_roles}\nodepart{second}\attrs{\pk{user\_id} (FK) \\ \pk{role\_id} (FK)}};
+\node[entity] (r) at (8.6,0) {\textbf{roles}\nodepart{second}\attrs{\pk{role\_id} \\ role\_name (UQ) \\ description}};
+\node[entity] (rp) at (12.8,0) {\textbf{role\_permissions}\nodepart{second}\attrs{\pk{role\_id} (FK) \\ \pk{permission\_code} (FK)}};
+\node[entity] (p) at (12.8,-4.2) {\textbf{permissions}\nodepart{second}\attrs{\pk{permission\_code} \\ description}};
+\node[entity] (s) at (4.5,-4.2) {\textbf{sessions}\nodepart{second}\attrs{\pk{session\_hash} \\ user\_id (FK) \\ created\_at, expires\_at}};
+\node[refentity] (o) at (0,-4.6) {\textbf{organizations}\nodepart{second}\attrs{\pk{organization\_id} \\ \dots}};
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (ur);
+\draw[rel] (r) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (ur);
+\draw[rel] (r) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (rp);
+\draw[rel] (p) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (rp);
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (s);
+\draw[rel] (o) -- node[card, pos=0.25]{0..1} node[card, pos=0.8]{N} (u);
+\end{tikzpicture}}
+\caption{ERD nhóm tài khoản và phân quyền}
+\label{fig:erd_rbac}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\resizebox{0.95\textwidth}{!}{%
+\begin{tikzpicture}
+\node[refentity] (u) at (0,0) {\textbf{users}\nodepart{second}\attrs{\pk{user\_id} \\ \dots}};
+\node[entity] (al) at (4.5,1.6) {\textbf{audit\_log}\nodepart{second}\attrs{\pk{log\_id} \\ user\_id (FK) \\ action, detail \\ created\_at}};
+\node[entity] (sl) at (4.5,-1.6) {\textbf{search\_log}\nodepart{second}\attrs{\pk{search\_id} \\ user\_id (FK) \\ request\_text, top\_k \\ result\_count, latency\_ms}};
+\node[entity] (sls) at (9,-1.6) {\textbf{search\_log\_sources}\nodepart{second}\attrs{\pk{search\_id} (FK) \\ \pk{source\_code} (FK)}};
+\node[entity] (src) at (13.4,-1.6) {\textbf{sources}\nodepart{second}\attrs{\pk{source\_code} \\ description}};
+\node[entity] (ers) at (13.4,-5.4) {\textbf{eval\_run\_sources}\nodepart{second}\attrs{\pk{run\_id} (FK) \\ \pk{source\_code} (FK)}};
+\node[entity] (er) at (9,-5.4) {\textbf{eval\_runs}\nodepart{second}\attrs{\pk{run\_id} \\ run\_name, top\_k \\ tolerance\_sec}};
+\node[entity] (eq) at (4.5,-5.4) {\textbf{eval\_requests}\nodepart{second}\attrs{\pk{run\_id} (FK) \\ \pk{request\_id} (FK) \\ latency\_ms}};
+\node[refentity] (g) at (0,-5.4) {\textbf{ground\_truth}\nodepart{second}\attrs{\pk{request\_id} \\ \dots}};
+\node[entity] (res) at (4.5,-9.2) {\textbf{eval\_results}\nodepart{second}\attrs{\pk{run\_id}, \pk{request\_id} (FK) \\ \pk{rank\_no} \\ keyframe\_id (FK)}};
+\node[refentity] (k) at (0,-9.2) {\textbf{keyframes}\nodepart{second}\attrs{\pk{keyframe\_id} \\ \dots}};
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (al);
+\draw[rel] (u) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (sl);
+\draw[rel] (sl) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (sls);
+\draw[rel] (src) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (sls);
+\draw[rel] (src) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (ers);
+\draw[rel] (er) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (ers);
+\draw[rel] (er) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (eq);
+\draw[rel] (g) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (eq);
+\draw[rel] (eq) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (res);
+\draw[rel] (k) -- node[card, pos=0.2]{1} node[card, pos=0.8]{N} (res);
+\end{tikzpicture}}
+\caption{ERD nhóm nhật ký và đánh giá}
+\label{fig:erd_logs}
+\end{figure}
+
+\section{Chuẩn hoá đến dạng chuẩn 3}
+
+\subsection{Phụ thuộc hàm của các bảng chính}
+
+Lược đồ được kiểm tra theo định nghĩa của Codd~\cite{codd1970relational} và các dạng chuẩn
+trong~\cite{elmasri2016fundamentals}: một lược đồ đạt 3NF nếu với mọi phụ thuộc hàm không
+tầm thường $X \rightarrow A$, hoặc $X$ là siêu khoá, hoặc $A$ thuộc một khoá ứng viên.
+Các phụ thuộc hàm chính:
+\begin{itemize}
+    \item \texttt{organizations}: \texttt{organization\_id} $\rightarrow$ mọi thuộc tính;
+    \texttt{org\_code} và \texttt{org\_name} cũng là khoá ứng viên.
+    \item \texttt{collections}: \texttt{collection\_id} $\rightarrow$ (\texttt{collection\_code},
+    \texttt{title}, \texttt{organization\_id}, \texttt{access\_level}, \dots);
+    \texttt{collection\_code} là khoá ứng viên.
+    \item \texttt{topics}: \texttt{topic\_id} $\rightarrow$ (\texttt{topic\_name},
+    \texttt{parent\_topic\_id}); \texttt{topic\_name} là khoá ứng viên.
+    \item \texttt{videos}: \texttt{video\_id} $\rightarrow$ (\texttt{collection\_id},
+    \texttt{title}, \texttt{fps}, \texttt{batch}).
+    \item \texttt{keyframes}: có bốn khoá ứng viên: \texttt{keyframe\_id},
+    (\texttt{video\_id}, \texttt{sample\_n}), (\texttt{video\_id}, \texttt{pts\_time}) và
+    (\texttt{video\_id}, \texttt{frame\_idx}). Mỗi khoá xác định mọi thuộc tính còn lại; dữ
+    liệu thật không có dòng trùng ở bất kỳ khoá nào, và cả bốn đều được khai báo bằng
+    ràng buộc PRIMARY KEY hoặc UNIQUE.
+    \item \texttt{ocr\_texts}: \texttt{keyframe\_id} $\rightarrow$ \texttt{ocr\_text};
+    \texttt{ocr\_text} $\rightarrow$ \texttt{text\_folded} (bỏ dấu là hàm của văn bản).
+    Tương tự với \texttt{asr\_segments}.
+    \item \texttt{users}: \texttt{user\_id} $\rightarrow$ mọi thuộc tính;
+    \texttt{username} là khoá ứng viên.
+    \item \texttt{requests}: \texttt{request\_id} $\rightarrow$ (\texttt{request\_text},
+    \texttt{origin}, \texttt{requested\_by}, \texttt{purpose}, \texttt{status},
+    \texttt{created\_at}).
+    \item \texttt{selections}: \texttt{selection\_id} $\rightarrow$ mọi thuộc tính;
+    (\texttt{request\_id}, \texttt{keyframe\_id}) là khoá ứng viên.
+    \item \texttt{usage\_licenses}: \texttt{license\_id} $\rightarrow$ mọi thuộc tính;
+    \texttt{request\_id} là khoá ứng viên (mỗi yêu cầu tối đa một giấy phép).
+    \item \texttt{eval\_results}: (\texttt{run\_id}, \texttt{request\_id}, \texttt{rank\_no})
+    $\rightarrow$ \texttt{keyframe\_id}; (\texttt{run\_id}, \texttt{request\_id},
+    \texttt{keyframe\_id}) cũng là khoá ứng viên.
+\end{itemize}
+
+\subsection{Các bước chuẩn hoá}
+
+Bản thiết kế đầu tiên của phần kho video chưa đạt 3NF; nhóm kiểm tra phụ thuộc hàm trên dữ
+liệu thật và sửa theo từng bước. Khi mở rộng sang danh mục thư viện và quy trình cấp phép,
+nhóm cũng cân nhắc một số phương án đơn giản hơn nhưng vi phạm chuẩn, rồi loại bỏ chúng
+(Bảng~\ref{tab:normalization}).
+
+{\renewcommand{\arraystretch}{1.25}
+\begin{longtable}{>{\raggedright\arraybackslash}p{1.4cm} >{\raggedright\arraybackslash}p{6.5cm} >{\raggedright\arraybackslash}p{6.5cm}}
+\caption{Các thay đổi trong quá trình chuẩn hoá}\label{tab:normalization}\\
+\toprule
+\textbf{Bước} & \textbf{Vấn đề} & \textbf{Cách sửa} \\
+\midrule \endfirsthead
+\toprule
+\textbf{Bước} & \textbf{Vấn đề} & \textbf{Cách sửa} \\
+\midrule \endhead
+\bottomrule \endfoot
+1NF & \texttt{search\_log.sources} và \texttt{eval\_runs.sources} lưu danh sách
+\texttt{"visual,ocr,asr"} trong một ô, tức thuộc tính đa trị. Không thể ràng buộc giá trị
+hợp lệ hay truy vấn ``những lượt dùng OCR'' bằng phép so sánh bằng. &
+Thêm bảng danh mục \texttt{sources} và hai bảng trung gian \texttt{search\_log\_sources},
+\texttt{eval\_run\_sources} với khoá chính ghép và khoá ngoại tới \texttt{sources}. \\
+\addlinespace
+1NF & Phương án lưu chủ đề của video thành chuỗi \texttt{"Nước rút, Về đích"} trong
+\texttt{videos} lặp lại lỗi trên, và không biểu diễn được cây chủ đề. &
+Bảng \texttt{topics} (có khoá ngoại tự tham chiếu tới chủ đề cha) và bảng trung gian
+\texttt{video\_topics}. Chuỗi chủ đề chỉ được ghép khi hiển thị, trong view
+\texttt{v\_video\_catalog}. \\
+\addlinespace
+2NF & Kiểm tra các bảng có khoá ghép: \texttt{user\_roles}, \texttt{role\_permissions},
+\texttt{ocr\_postings}, \texttt{asr\_postings}, \texttt{video\_topics}, hai bảng nguồn (toàn
+khoá); \texttt{eval\_requests}: \texttt{latency\_ms} phụ thuộc cả (\texttt{run\_id},
+\texttt{request\_id}); \texttt{eval\_results}: \texttt{keyframe\_id} phụ thuộc cả ba cột khoá. &
+Không có phụ thuộc bộ phận, không cần tách. \\
+\addlinespace
+3NF & \texttt{text\_folded} phụ thuộc bắc cầu qua \texttt{ocr\_text} /
+\texttt{asr\_text}, vốn không phải khoá. Khi sửa văn bản mà quên sửa
+\texttt{text\_folded} thì dữ liệu mâu thuẫn (dị thường cập nhật). &
+Chuyển thành cột tính toán \texttt{PERSISTED} \texttt{AS dbo.fn\_fold\_vi(ocr\_text)}.
+Giá trị do hệ quản trị tự tính và lưu, không ai ghi trực tiếp được, nên phụ thuộc
+được chính hệ quản trị bảo đảm. Nhóm giữ giá trị lưu thay vì bỏ cột vì cần dùng nó khi
+lập chỉ mục. \\
+\addlinespace
+3NF & Phương án lưu đơn vị sở hữu ngay trên video (\texttt{videos.organization\_id}) cho
+tiện truy vấn. Khi đó \texttt{video\_id} $\rightarrow$ \texttt{collection\_id}
+$\rightarrow$ \texttt{organization\_id} là phụ thuộc bắc cầu; chuyển bộ sưu tập sang đơn
+vị khác sẽ phải sửa mọi video của nó. &
+Không lưu; đơn vị sở hữu suy ra qua \texttt{collections}. View \texttt{v\_video\_catalog}
+ghép sẵn cho giao diện. \\
+\addlinespace
+3NF & Bản đầu định lưu sẵn khung hình gần nhất của mỗi đoạn lời nói
+(\texttt{asr\_segments.keyframe\_id}). Giá trị này suy ra từ (\texttt{video\_id},
+\texttt{start\_sec}, \texttt{end\_sec}) và dữ liệu của bảng \texttt{keyframes}. &
+Không lưu; hàm \texttt{fn\_nearest\_keyframe} tính khi truy vấn bằng hai lần dò chỉ mục. \\
+\addlinespace
+Dư thừa & Phương án thêm trạng thái ``đang xử lý'' cho yêu cầu đã có đoạn tư liệu được
+chọn. Trạng thái này suy ra hoàn toàn từ việc có dòng trong \texttt{selections} hay không. &
+Không lưu; \texttt{v\_request\_progress} đếm số đoạn đã chọn. \texttt{status} chỉ giữ ba
+giá trị không suy ra được: chờ xử lý, đã cấp phép, từ chối. \\
+\addlinespace
+Dư thừa & \texttt{keyframes.image\_path} suy ra hoàn toàn từ (\texttt{video\_id},
+\texttt{sample\_n}) theo quy ước tên tệp (đúng với 100\% số dòng). Không vi phạm 3NF vì vế
+trái là khoá ứng viên, nhưng là dữ liệu thừa. & Bỏ cột; đường dẫn do ứng dụng dựng từ hai
+cột khoá. \\
+\addlinespace
+Dư thừa & \texttt{videos.batch} là tiền tố của \texttt{video\_id}. & Cột tính toán
+\texttt{PERSISTED} có chỉ mục. \\
+\end{longtable}}
+
+\subsection{Kết quả và dư thừa có kiểm soát}
+
+Sau các bước trên, mọi phụ thuộc hàm không tầm thường trong từng bảng đều có vế trái là
+siêu khoá, nên lược đồ đạt 3NF và cả BCNF. Nhóm giữ có chủ đích hai dư thừa \textit{giữa các
+bảng} (không vi phạm dạng chuẩn của từng bảng) và kiểm tra chúng bằng script:
+\begin{itemize}
+    \item \texttt{keyframes.pts\_time} bằng \texttt{frame\_idx / videos.fps}. Trong bảng
+    \texttt{keyframes}, cả (\texttt{video\_id}, \texttt{pts\_time}) và (\texttt{video\_id},
+    \texttt{frame\_idx}) đều là khoá ứng viên. Nhóm giữ \texttt{pts\_time} vì đây là số đo gốc
+    trong dữ liệu và là cột của chỉ mục thời gian \texttt{UQ\_keyframes\_video\_time}. Mục E1
+    của \texttt{11\_tests.sql}: 0 dòng lệch trên 5.913 khung hình.
+    \item \texttt{requests.status = 'approved'} khi và chỉ khi yêu cầu có dòng trong
+    \texttt{usage\_licenses}. Nhóm giữ cột \texttt{status} vì hai giá trị còn lại (chờ xử lý,
+    từ chối) không suy ra được từ bảng nào, và vì hàng đợi ``yêu cầu chờ xử lý'' cần chỉ mục
+    \texttt{IX\_requests\_status}. Tính nhất quán được bảo đảm bằng thiết kế: ứng dụng không có
+    quyền \texttt{UPDATE} trên \texttt{requests}, trạng thái chỉ đổi qua
+    \texttt{sp\_grant\_license} (ghi giấy phép và trạng thái trong cùng một giao dịch) hoặc
+    \texttt{sp\_reject\_request}. Mục E2: 0 dòng lệch trên 120 yêu cầu.
+\end{itemize}
+
+Ngược lại, \texttt{usage\_licenses.licensee\_org\_id} trông giống dữ liệu suy ra được (từ
+người gửi yêu cầu sang đơn vị của người đó) nhưng không phải: nó là \textit{ảnh chụp} đơn vị
+tại thời điểm cấp phép. Nếu bạn đọc chuyển sang đơn vị khác, giấy phép đã cấp vẫn thuộc đơn
+vị cũ; suy ra lại từ \texttt{users.organization\_id} hiện tại sẽ cho kết quả sai. Tương tự,
+\texttt{users.user\_type} không suy ra được từ loại đơn vị: một trường đại học có cả nhà
+nghiên cứu lẫn sinh viên.
+
+\section{Danh sách bảng và mô tả cột}
+
+Các bảng dưới đây được sinh tự động từ catalog của SQL Server (\texttt{sys.columns},
+\texttt{sys.key\_constraints}, \texttt{sys.foreign\_keys}, \texttt{sys.default\_constraints})
+bằng \texttt{report/tools/gen\_schema.py}, nên luôn khớp với script \texttt{02\_tables.sql}.
+Cột ``Khoá / mặc định'' ghi PK, UQ, FK (kèm bảng được tham chiếu), IDENTITY và giá trị
+DEFAULT.
+
+{\small
+\input{chapters/generated/tables}
+}
+
+\section{Ràng buộc toàn vẹn}
+
+\subsection{Quy ước và số lượng}
+
+Mọi ràng buộc đều được đặt tên theo quy ước \texttt{<loại>\_<bảng>\_<ý nghĩa>}:
+\texttt{PK\_} khoá chính, \texttt{FK\_} khoá ngoại, \texttt{UQ\_} duy nhất, \texttt{CK\_}
+kiểm tra, \texttt{DF\_} mặc định. Nhờ vậy thông báo lỗi chỉ rõ ràng buộc nào bị vi phạm
+(xem mục~\ref{sec:tests}). Bảng~\ref{tab:constraint_counts} thống kê theo catalog.
+
+\begin{table}[H]
+\centering
+\caption{Số lượng ràng buộc theo loại}
+\label{tab:constraint_counts}
+\input{chapters/generated/constraint_counts}
+\end{table}
+
+\subsection{Ví dụ khai báo}
+
+Đoạn khai báo bảng \texttt{users} dùng đủ sáu loại ràng buộc ở mức cột và mức bảng:
+
+\begin{lstlisting}[caption={Bảng users với đủ các loại ràng buộc}, label={lst:users}]
+CREATE TABLE dbo.users (
+    user_id         INT IDENTITY(1,1) NOT NULL,
+    username        VARCHAR(32)   NOT NULL,
+    full_name       NVARCHAR(100) NOT NULL CONSTRAINT DF_users_full_name DEFAULT N'',
+    password_hash   VARCHAR(255)  NOT NULL,
+    organization_id SMALLINT      NULL,
+    user_type       VARCHAR(16)   NOT NULL CONSTRAINT DF_users_type DEFAULT 'other',
+    is_active       BIT           NOT NULL CONSTRAINT DF_users_is_active DEFAULT 1,
+    created_at      DATETIME2(0)  NOT NULL CONSTRAINT DF_users_created DEFAULT SYSDATETIME(),
+    last_login_at   DATETIME2(0)  NULL,
+    CONSTRAINT PK_users PRIMARY KEY (user_id),
+    CONSTRAINT UQ_users_username UNIQUE (username),
+    CONSTRAINT FK_users_organization FOREIGN KEY (organization_id)
+        REFERENCES dbo.organizations (organization_id),
+    CONSTRAINT CK_users_username CHECK (
+        LEN(username) BETWEEN 3 AND 32
+        AND username COLLATE Latin1_General_100_BIN2 NOT LIKE '%[^a-z0-9_.-]%'),
+    CONSTRAINT CK_users_type CHECK (user_type IN ('staff', 'journalist', 'researcher', 'student', 'other'))
+);
+\end{lstlisting}
+
+Một số điểm đáng chú ý:
+\begin{itemize}
+    \item \texttt{CK\_users\_username} so khớp với collation nhị phân để phân biệt hoa
+    thường; collation mặc định không phân biệt nên \texttt{'Admin'} sẽ lọt qua.
+    \item \texttt{CK\_videos\_id} dùng mẫu \texttt{'L[0-9][0-9][\_]V[0-9][0-9][0-9]'}, trong
+    đó \texttt{[\_]} thoát ký tự \texttt{\_}, vốn là ký tự đại diện của \texttt{LIKE}.
+    \item \texttt{CK\_usage\_licenses\_period} (\texttt{valid\_to > valid\_from}) là ràng buộc
+    giữa hai cột nên khai báo ở mức bảng. \texttt{CK\_topics\_parent} chặn một chủ đề tự làm
+    cha của chính nó.
+    \item Hành vi khi xoá được chọn theo ngữ nghĩa. Xoá yêu cầu khai thác thì xoá luôn vị trí
+    đã xác minh và các đoạn tư liệu đã chọn (\texttt{ON DELETE CASCADE}), nhưng không xoá được
+    yêu cầu đã có giấy phép: giấy phép là chứng từ, khoá ngoại để mặc định \texttt{NO ACTION}.
+    Không cho xoá khung hình đang được chọn cho một yêu cầu (\texttt{NO ACTION}).
+    \item Các khoá ngoại tới \texttt{users} trong nhóm yêu cầu (\texttt{requests.requested\_by},
+    \texttt{usage\_licenses.granted\_by}) đều \texttt{NO ACTION}: tài khoản được khoá chứ không
+    bị xoá, và yêu cầu, giấy phép nào cũng phải có người gửi, người cấp (cột \texttt{NOT NULL},
+    nên \texttt{SET NULL} không áp dụng được). Nhóm đã thử đặt \texttt{ON DELETE CASCADE} cho
+    \texttt{requests.requested\_by}: SQL Server từ chối với lỗi 1785 (\textit{may cause cycles
+    or multiple cascade paths}), vì khi xoá một tài khoản, \texttt{selections} sẽ bị tác động
+    theo hai đường: trực tiếp qua \texttt{selections.user\_id} (\texttt{SET NULL}) và gián tiếp
+    qua \texttt{requests} (\texttt{CASCADE}).
+\end{itemize}
+
+Toàn bộ 24 ràng buộc CHECK (lấy từ \texttt{sys.check\_constraints}):
+
+{\small
+\input{chapters/generated/checks}
+}
+
+\section{Chỉ mục}
+
+Mỗi khoá chính tạo một chỉ mục cụm (clustered) và mỗi ràng buộc UNIQUE tạo một chỉ mục
+không cụm. Ngoài ra có 12 chỉ mục \texttt{IX\_} bổ sung, chủ yếu trên các cột khoá ngoại
+hay được dùng để nối bảng và lọc. Bảng~\ref{tab:indexes} liệt kê các chỉ mục được những truy
+vấn thường gặp sử dụng; hiệu quả được đo ở mục~\ref{sec:tests}.
+
+\begin{table}[H]
+\centering
+\caption{Các chỉ mục phục vụ truy vấn thường xuyên}
+\label{tab:indexes}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{6.2cm} >{\raggedright\arraybackslash}X}
+\toprule
+\textbf{Chỉ mục} & \textbf{Phục vụ} \\
+\midrule
+\texttt{UQ\_keyframes\_video\_time} (video\_id, pts\_time) & Khung hình gần một thời điểm,
+khung hình lân cận (vừa là ràng buộc, vừa là chỉ mục) \\
+\texttt{PK\_ocr\_postings} (term\_id, keyframe\_id) & Tra danh sách khung hình của một từ khoá \\
+\texttt{UQ\_terms\_term} (term) & Tra mã của từ khoá \\
+\texttt{IX\_asr\_segments\_video\_time} (video\_id, start\_sec) & Lời nói quanh một thời điểm \\
+\texttt{IX\_requests\_status} (status) & Hàng đợi yêu cầu chờ xử lý \\
+\texttt{IX\_requests\_user} (requested\_by) & Bạn đọc xem yêu cầu của mình \\
+\texttt{IX\_usage\_licenses\_valid\_to} (valid\_to) & Giấy phép sắp hết hạn \\
+\texttt{IX\_videos\_collection}, \texttt{IX\_collections\_organization} & Thống kê theo bộ sưu tập, theo đơn vị \\
+\texttt{IX\_topics\_parent}, \texttt{IX\_video\_topics\_topic} & Đi xuống cây chủ đề, tìm video theo chủ đề \\
+\texttt{IX\_sessions\_expires} (expires\_at) & Dọn phiên hết hạn \\
+\texttt{IX\_audit\_log\_created} (created\_at) & Xem nhật ký mới nhất \\
+\bottomrule
+\end{tabularx}
+\end{table}

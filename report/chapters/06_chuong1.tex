@@ -1,0 +1,255 @@
+\chapter{KHẢO SÁT VÀ PHÂN TÍCH YÊU CẦU}
+
+\section{Bối cảnh và bài toán}
+
+Đài truyền hình, toà báo, trường đại học và bảo tàng đều đang giữ những kho video lớn: bản
+tin và phóng sự đã phát sóng, tường thuật thể thao, bài giảng, phim tư liệu về hiện vật.
+Phần lớn các kho này nằm rời rạc ở từng đơn vị, chỉ được gắn vài thông tin chung như tên
+chương trình và ngày phát hành. Người ngoài đơn vị hầu như không biết trong kho có gì. Khi
+một nhà báo cần một cảnh quay cũ cho phóng sự, một nhà nghiên cứu cần tư liệu về một sự
+kiện, hay một giảng viên cần đoạn video minh hoạ cho bài giảng, họ phải liên hệ từng nơi,
+chờ người giữ kho tua thủ công, rồi xin phép sử dụng bằng giấy tờ.
+
+\textbf{Thư viện số tư liệu nghe nhìn} giải quyết bài toán này theo mô hình quen thuộc của
+thư viện, nhưng cho video. Đề tài xây dựng hệ thống theo một \textit{tình huống giả định}:
+\begin{itemize}
+    \item Nhiều \textbf{đơn vị thành viên} cùng gửi video đã số hoá vào một kho dùng chung.
+    Mỗi đơn vị đóng góp các \textbf{bộ sưu tập} và giữ bản quyền của chúng; bộ sưu tập có thể
+    mở cho mọi người hoặc hạn chế (dùng lại phải có giấy phép).
+    \item Video được biên mục: có nhan đề, thuộc một bộ sưu tập, được gắn các \textbf{chủ đề}
+    trong một cây phân loại, và được số hoá thành khung hình, chữ trên màn hình (OCR) và lời
+    nói (ASR) để tra cứu được theo nội dung.
+    \item \textbf{Bạn đọc} (nhà báo, nhà nghiên cứu, sinh viên) mô tả đoạn tư liệu cần tìm
+    bằng tiếng Việt, ví dụ ``tay đua áo vàng về đích, phía sau là biển hiệu Hồng Thái Phúc
+    Lộc'', và nhận các khung hình khớp nhất trong vài giây.
+    \item Muốn dùng lại tư liệu, bạn đọc gửi \textbf{yêu cầu khai thác} kèm mục đích sử dụng
+    (phát sóng, nghiên cứu, giảng dạy, trưng bày). \textbf{Cán bộ thư viện} tìm và chọn đúng
+    đoạn tư liệu, rồi \textbf{cấp giấy phép sử dụng} có thời hạn hoặc từ chối.
+\end{itemize}
+
+Trọng tâm của đề tài là \textbf{hệ quản trị dữ liệu} cho bài toán này. Cơ sở dữ liệu phải
+lưu được danh mục nhiều đơn vị và hàng nghìn khung hình kèm văn bản, tìm kiếm trả lời trong
+tối đa 30 giây, quản lý vòng đời yêu cầu khai thác và giấy phép một cách nhất quán, phân
+quyền cho nhiều loại người dùng, ghi nhật ký mọi thao tác và đo được chất lượng tìm kiếm.
+Phần lớn logic được đặt ngay trong SQL Server để vận dụng các nội dung của học phần.
+
+\section{Các bên tham gia}
+
+\begin{itemize}
+    \item \textbf{Đơn vị thành viên}: đài truyền hình, báo, trường, bảo tàng, và chính đơn vị
+    vận hành thư viện. Một đơn vị có thể vừa đóng góp bộ sưu tập, vừa có bạn đọc khai thác tư
+    liệu của đơn vị khác.
+    \item \textbf{Bạn đọc}: người dùng tra cứu và gửi yêu cầu khai thác. Bạn đọc thuộc một đơn
+    vị hoặc là cá nhân, và được phân loại theo đối tượng (nhà báo, nhà nghiên cứu, sinh viên,
+    khác) để thống kê.
+    \item \textbf{Cán bộ thư viện}: xử lý yêu cầu: tìm, chọn đoạn tư liệu phù hợp, duyệt và
+    cấp giấy phép hoặc từ chối.
+    \item \textbf{Quản trị}: quản lý tài khoản, vai trò, theo dõi nhật ký và chất lượng tìm
+    kiếm.
+\end{itemize}
+
+\section{Quy trình nghiệp vụ}
+
+\begin{enumerate}
+    \item \textbf{Biên mục}: đơn vị đóng góp bộ sưu tập; video được ghi nhan đề, gắn chủ đề
+    và số hoá (khung hình, OCR, ASR). Trong đề tài, khâu số hoá được xem là đã có sẵn.
+    \item \textbf{Tra cứu}: bạn đọc nhập mô tả; hệ thống đối chiếu với hình ảnh, chữ trên màn
+    hình và lời nói, trả về các khung hình đã xếp hạng kèm bằng chứng (nguồn nào tìm thấy, xếp
+    hạng mấy). Trang chi tiết khung hình cho xem ảnh lớn, khung hình lân cận, chữ OCR, lời nói
+    $\pm 15$ giây và phiếu mô tả video (bộ sưu tập, đơn vị giữ bản quyền, chủ đề).
+    \item \textbf{Gửi yêu cầu khai thác}: bạn đọc mô tả đoạn tư liệu cần dùng và chọn mục đích
+    sử dụng. Yêu cầu mới ở trạng thái \textit{chờ xử lý}.
+    \item \textbf{Chọn đoạn tư liệu}: cán bộ thư viện tìm và chọn một hay nhiều khung hình cho
+    yêu cầu, có thể kèm ghi chú.
+    \item \textbf{Duyệt}: cán bộ cấp giấy phép (ghi đơn vị được cấp phép, thời hạn, điều kiện)
+    hoặc từ chối. Chỉ cấp phép được khi yêu cầu đã có ít nhất một đoạn tư liệu. Sau khi duyệt
+    hay từ chối, yêu cầu và danh sách đoạn tư liệu bị khoá (Hình~\ref{fig:request_states}).
+    \item \textbf{Theo dõi}: xuất danh sách đoạn tư liệu (video, số khung hình gốc, thời điểm)
+    để trích đoạn; theo dõi giấy phép sắp hết hạn; thống kê yêu cầu theo đơn vị, mục đích.
+    \item \textbf{Quản trị}: tạo tài khoản, gán vai trò, khoá tài khoản, xem nhật ký; chạy
+    đánh giá chất lượng tìm kiếm.
+\end{enumerate}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    state/.style={draw=blue!60!black, thick, rounded corners=6pt, fill=blue!6, align=center,
+        font=\small, minimum height=1cm, minimum width=2.6cm},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick},
+    note/.style={font=\scriptsize, align=center}]
+\node[circle, fill=black, inner sep=2.5pt] (start) at (-1.6,0) {};
+\node[state] (pending) at (3.2,0) {\textbf{pending}\\\footnotesize chờ xử lý};
+\node[state, fill=green!8, draw=green!45!black] (approved) at (9.4,1.3) {\textbf{approved}\\\footnotesize đã cấp phép};
+\node[state, fill=red!6, draw=red!60!black] (rejected) at (9.4,-1.3) {\textbf{rejected}\\\footnotesize từ chối};
+\draw[arrow] (start) -- node[above, note]{\texttt{sp\_submit\_request}} (pending);
+\draw[arrow] (pending) -- node[above, note, sloped]{\texttt{sp\_grant\_license}\\(cần $\geq 1$ đoạn)} (approved);
+\draw[arrow] (pending) -- node[below, note, sloped]{\texttt{sp\_reject\_request}} (rejected);
+\draw[arrow] (pending.south) to[out=-70, in=-110, looseness=6]
+    node[below, note]{\texttt{sp\_add\_selection}, \texttt{sp\_remove\_selection}} (pending.south west);
+\end{tikzpicture}
+\caption{Vòng đời của một yêu cầu khai thác; trạng thái chỉ đổi qua thủ tục lưu trữ}
+\label{fig:request_states}
+\end{figure}
+
+\section{Mô tả hệ thống}
+
+Hệ thống gồm cơ sở dữ liệu SQL Server và một ứng dụng web nhỏ (Hình~\ref{fig:architecture}).
+Ứng dụng chỉ là lớp giao diện mỏng: mọi thao tác dữ liệu đi qua câu lệnh SQL hoặc thủ tục
+lưu trữ, và chính cơ sở dữ liệu kiểm tra lại quyền cùng trạng thái của yêu cầu.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+    box/.style={draw=blue!60!black, thick, rounded corners=3pt, fill=blue!6, align=center,
+        font=\small, minimum height=1cm, inner sep=5pt},
+    db/.style={box, fill=orange!10, draw=orange!70!black},
+    arrow/.style={-{Stealth[length=2.5mm]}, thick}]
+\node[box, text width=2.1cm] (browser) {Trình duyệt\\(bạn đọc, cán bộ)};
+\node[box, right=1.3cm of browser, text width=4.0cm] (app) {Ứng dụng web FastAPI\\
+    \footnotesize đăng nhập, kiểm tra quyền,\\ \footnotesize hạ quyền bằng \mbox{\texttt{EXECUTE AS}}};
+\node[db, right=1.3cm of app, text width=4.4cm] (sql) {\textbf{SQL Server Express}\\
+    \footnotesize danh mục, kho video, chỉ mục ngược,\\
+    \footnotesize yêu cầu, giấy phép, hàm, thủ tục,\\
+    \footnotesize view, trigger, role, nhật ký};
+\node[box, below=1.6cm of app, text width=4.0cm] (visual) {Kênh hình ảnh\\
+    \footnotesize SigLIP2 (CPU) + FAISS};
+\node[box, below=1.6cm of sql, text width=4.4cm, fill=gray!8, draw=gray] (files) {Video đã số hoá\\
+    \footnotesize khung hình, OCR, ASR};
+\draw[arrow] (browser) -- node[above, font=\scriptsize]{HTTP} node[below, font=\scriptsize]{cookie} (app);
+\draw[arrow] (app) -- node[above, font=\scriptsize]{ODBC} node[below, font=\scriptsize]{EXEC} (sql);
+\draw[arrow] ([xshift=-8mm]app.south) -- node[left, font=\scriptsize]{mô tả} ([xshift=-8mm]visual.north);
+\draw[arrow] ([xshift=8mm]visual.north) -- node[right, font=\scriptsize, align=left]{JSON\\keyframe\_id} ([xshift=8mm]app.south);
+\draw[arrow, dashed] (files) -- node[right, font=\scriptsize]{\texttt{09\_sample\_data.sql}} (sql);
+\end{tikzpicture}
+\caption{Kiến trúc tổng thể của hệ thống}
+\label{fig:architecture}
+\end{figure}
+
+Các chức năng chính:
+\begin{itemize}
+    \item \textbf{Danh mục thư viện}: đơn vị thành viên, bộ sưu tập (mở hoặc hạn chế), cây chủ
+    đề nhiều cấp và việc gắn chủ đề cho video; phiếu mô tả video và thống kê theo bộ sưu tập,
+    theo nhánh chủ đề.
+    \item \textbf{Tra cứu theo mô tả}, gộp ba nguồn bằng chứng: hình ảnh (vector SigLIP2),
+    chữ trên hình (OCR) và lời nói (ASR). Việc tách từ, tra chỉ mục ngược, tính điểm và gộp
+    xếp hạng đều do thủ tục \texttt{sp\_search\_footage} thực hiện.
+    \item \textbf{Yêu cầu khai thác và giấy phép}: gửi yêu cầu, chọn đoạn tư liệu, cấp phép
+    hoặc từ chối, theo dõi hiệu lực giấy phép; bạn đọc chỉ thấy yêu cầu của mình.
+    \item \textbf{Tài khoản và phân quyền}: tạo tài khoản (kèm đơn vị, đối tượng), gán vai
+    trò, khoá tài khoản, đặt lại mật khẩu; mọi thay đổi được ghi nhật ký.
+    \item \textbf{Đo chất lượng tìm kiếm}: chạy toàn bộ yêu cầu mẫu đã xác minh, lưu kết quả
+    và tính Recall@K, MRR, độ trễ bằng view.
+\end{itemize}
+
+\section{Người dùng và vai trò}
+
+Hệ thống phân quyền theo vai trò (RBAC). Quyền được gán cho vai trò, vai trò được gán cho
+người dùng; một người có thể có nhiều vai trò (Bảng~\ref{tab:roles}). Vai trò quyết định
+người dùng \textit{được làm gì}; còn đối tượng bạn đọc (nhà báo, nhà nghiên cứu, sinh viên)
+và đơn vị công tác là thông tin thống kê và được ghi vào giấy phép, không cấp thêm quyền.
+
+\begin{table}[H]
+\centering
+\caption{Vai trò và quyền nghiệp vụ}
+\label{tab:roles}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Vai trò} & \rotatebox{70}{\texttt{\footnotesize search.run}} & \rotatebox{70}{\texttt{\footnotesize request.submit}}
+ & \rotatebox{70}{\texttt{\footnotesize selection.write}} & \rotatebox{70}{\texttt{\footnotesize license.grant}}
+ & \rotatebox{70}{\texttt{\footnotesize eval.view}} & \rotatebox{70}{\texttt{\footnotesize user.manage}} \\
+\midrule
+reader -- bạn đọc & \checkmark & \checkmark & & & & \\
+librarian -- cán bộ thư viện & \checkmark & \checkmark & \checkmark & \checkmark & & \\
+admin -- quản trị & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark & \checkmark \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Dữ liệu}
+
+Đề tài không có kho video của các đơn vị thật. Phần video dùng một bộ video tiếng Việt công
+khai đã được trích khung hình, OCR và ASR; toàn bộ bộ dữ liệu có 873 video với 401.153 khung
+hình, 269.634 dòng OCR và 74.049 đoạn lời nói. Để giảm dung lượng phải tải, cơ sở dữ liệu mẫu
+chỉ dùng \textbf{lô L23} (khoảng 1,5\% bộ dữ liệu): 25 đoạn tường thuật một giải đua xe đạp
+truyền hình, có nhiều chữ trên màn hình và lời bình luận (Bảng~\ref{tab:source_data}). Cả 25
+video được xếp vào một bộ sưu tập ``Tường thuật đua xe đạp truyền hình'' do đơn vị vận hành
+thư viện quản lý.
+
+Nhóm tự viết 120 \textbf{yêu cầu khai thác mẫu} theo cách một bạn đọc mô tả đoạn tư liệu cần
+dùng, rồi xác minh thủ công vị trí đúng (video và thời điểm) của từng yêu cầu. Bộ yêu cầu này
+vừa là dữ liệu mẫu cho quy trình khai thác, vừa dùng để đo chất lượng tìm kiếm.
+
+\begin{table}[H]
+\centering
+\caption{Dữ liệu nguồn và phần được đưa vào cơ sở dữ liệu}
+\label{tab:source_data}
+\renewcommand{\arraystretch}{1.2}
+\small
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{4.0cm} >{\raggedright\arraybackslash}X r}
+\toprule
+\textbf{Nguồn} & \textbf{Nội dung} & \textbf{Số dòng (L23)} \\
+\midrule
+\texttt{frames.csv} & Danh mục khung hình: video, số thứ tự, thời điểm, chỉ số khung hình gốc & 5.913 \\
+\texttt{map-keyframes} & Tốc độ khung hình (fps) của từng video & 25 video \\
+\texttt{ocr.sqlite} & Chữ nhận dạng trên khung hình & 3.976 \\
+\texttt{asr.sqlite} & Lời nói theo đoạn thời gian & 1.238 \\
+\texttt{l23\_requests.csv} & Yêu cầu khai thác mẫu kèm vị trí đã xác minh & 120 \\
+Ảnh \texttt{L23.zip} & Ảnh khung hình để hiển thị (1,1 GB) & 5.913 tệp \\
+Chỉ mục SigLIP2 & Vector 1152 chiều của khung hình (chỉ phần L23) & 5.913 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Phần danh mục bao quanh kho video là \textbf{dữ liệu minh hoạ}, được ghi rõ như vậy trong
+script \texttt{09\_sample\_data.sql}:
+\begin{itemize}
+    \item Bốn đơn vị thành viên khác (``Đài truyền hình mẫu A'', ``Báo điện tử mẫu B'',
+    ``Trường đại học mẫu C'', ``Bảo tàng mẫu D''), mỗi đơn vị có một bộ sưu tập chưa nạp
+    video. Tên đều chứa chữ ``mẫu'' và không mô tả tổ chức có thật nào.
+    \item Năm tài khoản demo (quản trị, một cán bộ thư viện, ba bạn đọc thuộc hai đơn vị),
+    mục đích, trạng thái của 120 yêu cầu và 30 giấy phép. Ngày gửi yêu cầu và ngày cấp phép
+    được tính lùi từ thời điểm nạp dữ liệu, nên có cả giấy phép còn hạn, sắp hết hạn và đã
+    hết hạn.
+    \item \textbf{Chủ đề} của video thì không bịa: chúng được gắn bằng luật trên lời nói thật.
+    Ví dụ, video thuộc chủ đề ``Nước rút'' nếu có ít nhất một đoạn lời bình chứa cụm ``nước
+    rút'' (sau khi bỏ dấu). Mọi nhãn chủ đề vì thế truy được về câu nói đã sinh ra nó.
+\end{itemize}
+
+\section{Yêu cầu phi chức năng}
+
+\begin{itemize}
+    \item \textbf{Thời gian phản hồi}: mỗi lượt tìm xong trong 30 giây; quá hạn thì câu lệnh
+    bị huỷ trên máy chủ và người dùng nhận thông báo thay vì chờ mãi.
+    \item \textbf{Toàn vẹn dữ liệu}: dùng đủ các loại ràng buộc PK, FK, UNIQUE, NOT NULL,
+    DEFAULT, CHECK, đặt tên rõ ràng; dữ liệu dẫn xuất được tính bằng cột tính toán hoặc view;
+    trạng thái yêu cầu và giấy phép luôn khớp nhau.
+    \item \textbf{Bảo mật và truy vết}: mật khẩu băm có muối, phiên đăng nhập chỉ lưu giá trị
+    băm; ứng dụng làm việc với quyền tối thiểu; quyền nghiệp vụ và trạng thái yêu cầu được
+    kiểm tra lại trong CSDL; bạn đọc chỉ thấy yêu cầu của mình; mọi thao tác chọn đoạn tư
+    liệu, duyệt yêu cầu và thay đổi tài khoản đều có nhật ký.
+    \item \textbf{Chạy trên SQL Server Express}: không dùng tính năng chỉ có ở bản trả phí;
+    script chạy được trên SQL Server 2017 trở lên.
+    \item \textbf{Tái lập}: một tệp \texttt{full\_setup.sql} dựng lại toàn bộ CSDL và dữ liệu
+    mẫu; mọi số liệu trong báo cáo đều chạy lại được.
+\end{itemize}
+
+\section{Lựa chọn công nghệ và phạm vi}
+
+\textbf{SQL Server Express} là hệ quản trị CSDL theo yêu cầu đề bài. Bản Express không có
+dịch vụ Full-Text Search, nên đề tài tự xây \textbf{chỉ mục ngược} bằng bảng: từ điển từ
+khoá và danh sách (từ khoá, khung hình). Đây cũng là cấu trúc cốt lõi của các hệ thống tìm
+kiếm văn bản~\cite{manning2008ir}, nên thể hiện rõ vai trò của chỉ mục và khoá trong CSDL.
+
+Kênh hình ảnh dùng mô hình đa ngôn ngữ \textbf{SigLIP2}~\cite{tschannen2025siglip2} (kế thừa
+SigLIP~\cite{zhai2023siglip}) để biến mô tả tiếng Việt thành vector, rồi tra chỉ mục
+\textbf{FAISS}~\cite{johnson2021faiss} chứa sẵn vector của các khung hình. Phần này chạy ngoài
+CSDL vì SQL Server không có kiểu vector; kết quả (danh sách \texttt{keyframe\_id} đã xếp hạng)
+được đưa vào thủ tục tìm kiếm dưới dạng JSON để gộp với các nguồn văn bản. Các danh sách xếp
+hạng được gộp bằng \textbf{Reciprocal Rank Fusion}~\cite{cormack2009rrf}.
+
+Ứng dụng web viết bằng Python (FastAPI), kết nối SQL Server qua ODBC. Phạm vi đề tài không
+gồm khâu số hoá video (trích khung hình, OCR, ASR), vốn được xem là đã có sẵn; không gồm việc
+thu phí, ký hợp đồng bản quyền với đơn vị đóng góp, hay chuyển tệp video gốc cho bạn đọc sau
+khi được cấp phép.

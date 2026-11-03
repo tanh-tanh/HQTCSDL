@@ -1,0 +1,79 @@
+== A. Ràng buộc toàn vẹn ==
+PK       -> lỗi 2627: Violation of PRIMARY KEY constraint 'PK_videos'. Cannot insert
+    duplicate key in object 'dbo.videos'. The duplicate key value is (L23_V001).
+UNIQUE   -> lỗi 2627: Violation of UNIQUE KEY constraint 'UQ_keyframes_video_n'.
+    Cannot insert duplicate key in object 'dbo.keyframes'. The duplicate key value is
+    (L23_V001, 1).
+FK       -> lỗi 547: The INSERT statement conflicted with the FOREIGN KEY constraint
+    "FK_keyframes_video". The conflict occurred in database "video_archive", table
+    "dbo.videos", column 'video_id'.
+FK       -> lỗi 547: The DELETE statement conflicted with the REFERENCE constraint
+    "FK_requests_user". The conflict occurred in database "video_archive", table
+    "dbo.requests", column 'requested_by'.
+FK       -> lỗi 547: The DELETE statement conflicted with the REFERENCE constraint
+    "FK_usage_licenses_request". The conflict occurred in database "video_archive",
+    table "dbo.usage_licenses", column 'request_id'.
+FK       -> lỗi 547: The INSERT statement conflicted with the FOREIGN KEY SAME TABLE
+    constraint "FK_topics_parent". The conflict occurred in database "video_archive",
+    table "dbo.topics", column 'topic_id'.
+NOT NULL -> lỗi 515: Cannot insert the value NULL into column 'request_text', table
+    'video_archive.dbo.requests'; column does not allow nulls. INSERT fails.
+CHECK    -> lỗi 547: The INSERT statement conflicted with the CHECK constraint
+    "CK_users_username". The conflict occurred in database "video_archive", table
+    "dbo.users", column 'username'.
+CHECK    -> lỗi 547: The INSERT statement conflicted with the CHECK constraint
+    "CK_asr_segments_span". The conflict occurred in database "video_archive", table
+    "dbo.asr_segments".
+CHECK    -> lỗi 547: The UPDATE statement conflicted with the CHECK constraint
+    "CK_requests_purpose". The conflict occurred in database "video_archive", table
+    "dbo.requests", column 'purpose'.
+CHECK    -> lỗi 547: The UPDATE statement conflicted with the CHECK constraint
+    "CK_usage_licenses_period". The conflict occurred in database "video_archive",
+    table "dbo.usage_licenses".
+VIEW CHECK OPTION -> lỗi 550: The attempted insert or update failed because the target
+    view either specifies WITH CHECK OPTION or spans a view that specifies WITH CHECK
+    OPTION and one or more rows resulting from the operation did not qualify under the
+    CHECK OPTION constraint.
+username|full_name|is_active|created_at
+--------|---------|---------|----------
+default_demo||1|2026-10-12 21:20:35
+DEFAULT  -> full_name = N'', is_active = 1, created_at = SYSDATETIME() (đã rollback)
+== B. Giao dịch ==
+B1. Trong giao dịch: 61 đoạn đã chọn
+B1. Sau ROLLBACK:    60 đoạn đã chọn (trước đó 60)
+B2. sp_create_user lỗi 50002: Vai trò không tồn tại.
+B2. Số tài khoản atomic_demo: 0
+user_id
+-------
+9
+username|roles
+--------|-----
+tx_demo|librarian, reader
+B3. Sau ROLLBACK, số tài khoản tx_demo: 0
+license_id
+----------
+31
+request_id|status|valid_from|valid_to
+----------|------|----------|--------
+YC-003|approved|2026-10-12|2027-01-10
+B4. Sau ROLLBACK, YC-003 trở lại trạng thái pending, số giấy phép: 0
+B5. sp_grant_license YC-004 -> lỗi 50006: Chưa chọn đoạn tư liệu nào cho yêu cầu.
+B5. YC-004 vẫn pending, số giấy phép: 0
+== C. Phân quyền ==
+C1. archive_report đọc được 5913 khung hình
+C1. archive_report INSERT -> lỗi 229: The INSERT permission was denied on the object
+    'audit_log', database 'video_archive', schema 'dbo'.
+C1. archive_report EXEC sp_add_selection -> lỗi 229: The EXECUTE permission was denied
+    on the object 'sp_add_selection', database 'video_archive', schema 'dbo'.
+C1. archive_report EXEC sp_grant_license -> lỗi 229: The EXECUTE permission was denied
+    on the object 'sp_grant_license', database 'video_archive', schema 'dbo'.
+C2. archive_app DELETE keyframes -> lỗi 229: The DELETE permission was denied on the
+    object 'keyframes', database 'video_archive', schema 'dbo'.
+C2. archive_app ALTER TABLE -> lỗi 1088: Cannot find the object "users" because it
+    does not exist or you do not have permissions.
+C2. archive_app UPDATE requests -> lỗi 229: The UPDATE permission was denied on the
+    object 'requests', database 'video_archive', schema 'dbo'.
+C3. bandoc1 sp_add_selection -> lỗi 50001: Không có quyền selection.write.
+C3. bandoc1 sp_grant_license -> lỗi 50001: Không có quyền license.grant.
+C4. thuthu1 sp_add_selection YC-001 (approved) -> lỗi 50005: Yêu cầu đã được xử lý,
+    không sửa danh sách đoạn tư liệu.

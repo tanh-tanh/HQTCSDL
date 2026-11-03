@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "footage"
+version = "0.2.0"
+description = "Digital audiovisual library (footage search, access requests, licences) on SQL Server"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "jinja2",
+  "pyodbc",
+  "python-multipart",
+  "uvicorn",
+]
+
+[project.optional-dependencies]
+# The visual channel: a SigLIP2 text tower on CPU plus the team's FAISS index.
+# Everything else (SQL Server search, accounts, answers) runs without it.
+visual = [
+  "faiss-cpu",
+  "numpy",
+  "sentencepiece",
+  "torch",
+  "transformers>=4.56,<5",
+]
+
+[project.scripts]
+footage = "footage.cli:main"
+
+[dependency-groups]
+dev = [
+  "httpx",
+  "pytest",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+footage = ["templates/*.html", "static/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+# CPU-only PyTorch wheels: no CUDA download, no GPU needed for one query vector.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.uv]
+environments = ["sys_platform == 'win32'", "sys_platform == 'linux'"]
