@@ -1,7 +1,10 @@
 {% extends "base.html" %}
+{% block title %}Danh sách kết quả · Thư viện số nghe nhìn{% endblock %}
 {% block content %}
+<p class="eyebrow">Dạng danh sách · cùng bộ máy tìm kiếm với giao diện 3D</p>
+<h1>Tra cứu khung hình</h1>
 <section class="card">
-  <form method="get" action="/" class="stack">
+  <form method="get" action="/list" class="stack">
     <label>Chọn yêu cầu khai thác
       <select name="request_id" onchange="this.form.q.value=''; this.form.submit()">
         <option value="">— tự nhập mô tả —</option>
@@ -21,6 +24,7 @@
       {% endfor %}
       <label class="check">Top-K <input type="number" name="k" value="{{ k }}" min="1" max="200" class="small"></label>
       <button type="submit">Tìm</button>
+      <a class="button ghost" href="/?{{ {'q': q}|urlencode if q else '' }}">Mở giao diện 3D</a>
     </div>
     <p class="muted">Kênh hình ảnh: {{ visual.status if visual else "tắt (chưa cấu hình index SigLIP2)" }}</p>
   </form>
@@ -36,7 +40,7 @@
   </p>
   <div class="grid">
     {% for row in outcome.results %}
-    <a class="tile" href="/frames/{{ row.keyframe_id }}{% if request_id %}?request_id={{ request_id }}{% endif %}">
+    <a class="tile" href="/frames/{{ row.keyframe_id }}?{{ {'q': q, 'view': 'ring'}|urlencode }}{% if request_id %}&amp;request_id={{ request_id|urlencode }}{% endif %}">
       <img src="/img/{{ row.keyframe_id }}" loading="lazy" alt="{{ row.video_id }} {{ row.pts_time }}s">
       <span class="caption">#{{ row.rank }} · {{ row.video_id }} · {{ "%.1f"|format(row.pts_time) }}s</span>
       <span class="evidence">{{ row.evidence }}</span>

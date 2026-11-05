@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Tạo tài khoản · Thư viện số nghe nhìn{% endblock %}
+{% block body_class %}page auth-page{% endblock %}
+{% block content %}
+<section class="auth">
+  <p class="eyebrow">Thư viện số · Video archive</p>
+  <h1>Tạo <em>tài khoản</em></h1>
+  <p class="lede">Tài khoản bạn đọc: tra cứu kho và gửi yêu cầu khai thác. Quyền cán bộ thư viện do quản trị viên cấp.</p>
+  {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+  <form method="post" action="/register" class="stack" autocomplete="on">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label>Họ tên <input name="full_name" maxlength="100" autocomplete="name" value="{{ form.get('full_name', '') }}"></label>
+    <label>Tên đăng nhập
+      <input name="username" required minlength="3" maxlength="32" pattern="[a-z0-9_.\-]{3,32}" autocomplete="username"
+             value="{{ form.get('username', '') }}" aria-describedby="username-hint">
+      <span class="field-hint" id="username-hint">3–32 ký tự thường a-z, 0-9, dấu _ . -</span>
+    </label>
+    <label>Đối tượng
+      <select name="user_type">
+        {% for code, name in public_user_types.items() %}<option value="{{ code }}" {% if form.get('user_type', 'other') == code %}selected{% endif %}>{{ name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Mật khẩu <input name="password" type="password" required minlength="8" autocomplete="new-password" aria-describedby="password-hint">
+      <span class="field-hint" id="password-hint">Ít nhất 8 ký tự.</span></label>
+    <label>Nhập lại mật khẩu <input name="password_confirm" type="password" required minlength="8" autocomplete="new-password"></label>
+    <button type="submit">Tạo tài khoản</button>
+  </form>
+  <p class="alt">Đã có tài khoản? <a href="/login{% if next and next != '/' %}?next={{ next|urlencode }}{% endif %}">Đăng nhập</a></p>
+</section>
+{% endblock %}

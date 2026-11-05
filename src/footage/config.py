@@ -38,6 +38,10 @@ class Settings:
     search_pool: int
     session_hours: int
     secure_cookies: bool
+    # Public /register page that creates reader accounts (sp_register_reader).
+    self_registration: bool = True
+    # Header label of the archive interface.
+    archive_label: str = "THƯ VIỆN SỐ / VIDEO ARCHIVE"
 
 
 def load_settings() -> Settings:
@@ -62,4 +66,6 @@ def load_settings() -> Settings:
         search_pool=int(_env("ARCHIVE_SEARCH_POOL", "200")),
         session_hours=int(_env("ARCHIVE_SESSION_HOURS", "12")),
         secure_cookies=_env("ARCHIVE_SECURE_COOKIES", "0") in {"1", "true", "yes"},
+        self_registration=_env("ARCHIVE_SELF_REGISTRATION", "1") not in {"0", "false", "no"},
+        archive_label=_env("ARCHIVE_LABEL", "THƯ VIỆN SỐ / VIDEO ARCHIVE"),
     )

@@ -55,6 +55,8 @@ class User:
     username: str
     full_name: str
     permissions: set[str] = field(default_factory=set)
+    # Role names, loaded on demand for the header (web.with_roles).
+    roles: list[str] | None = None
 
     def can(self, permission: str) -> bool:
         return permission in self.permissions
@@ -131,6 +133,17 @@ def create_user(connection, username: str, password: str, roles: list[str],
     rows = call(connection, "sp_create_user", username=username, password_hash=hash_password(password),
                 roles=",".join(roles), full_name=full_name, organization_id=organization_id,
                 user_type=user_type)
+    return int(rows[0]["user_id"])
+
+
+def register_reader(connection, username: str, password: str, full_name: str = "",
+                    user_type: str = "other") -> int:
+    """Public self-registration: sp_register_reader always grants only 'reader'."""
+    problem = validate_new_password(password)
+    if problem:
+        raise ValueError(problem)
+    rows = call(connection, "sp_register_reader", username=username,
+                password_hash=hash_password(password), full_name=full_name, user_type=user_type)
     return int(rows[0]["user_id"])
 
 

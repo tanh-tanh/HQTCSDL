@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Yêu cầu khai thác · Thư viện số nghe nhìn{% endblock %}
 {% block content %}
+<p class="eyebrow">Quy trình khai thác · yêu cầu → chọn đoạn → giấy phép</p>
 {% if error %}<p class="error">{{ error }}</p>{% endif %}
 
 {% if user.can('request.submit') %}

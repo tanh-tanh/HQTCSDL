@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}{% if boot.query %}{{ boot.query }} · {% endif %}Hệ quản trị CSDL · Nhóm 4{% endblock %}
+{% block head %}<link rel="stylesheet" href="/static/orbit/archive.css?v={{ asset_version('orbit/archive.css') }}">{% endblock %}
+{% block body_class %}archive view-{{ boot.view }}{% if not user %} is-anonymous{% endif %}{% endblock %}
+{% block content %}
+<div class="stage" id="stage" aria-hidden="true"></div>
+
+<div class="archive-controls">
+  <form class="search" id="search" role="search" method="get" action="/">
+    <svg class="icon search-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>
+    <label class="sr-only" for="search-input">Tìm trong kho tư liệu</label>
+    <input id="search-input" name="q" type="search" autocomplete="off" spellcheck="false"
+           value="{{ boot.query }}" placeholder="Tìm video, chủ đề, bộ sưu tập, mô tả...">
+    <input type="hidden" name="view" value="{{ boot.view }}">
+    <span class="search-meta mono" id="search-meta" aria-live="polite"></span>
+    <button type="button" class="search-options" id="options-toggle" aria-label="Tuỳ chọn tìm kiếm"
+            aria-expanded="false" aria-controls="options-panel">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>
+    </button>
+    <div class="popover options-panel" id="options-panel" hidden></div>
+  </form>
+  <div class="filters" id="filters" role="group" aria-label="Bộ lọc"></div>
+</div>
+
+<div class="titles" aria-hidden="false">
+  <h1 class="display-title">Hệ quản trị CSDL</h1>
+  <p class="group-title">Nhóm 4</p>
+</div>
+
+<div class="archive-message" id="archive-message" role="status" aria-live="polite">
+  {% if error %}<p>{{ error }}</p>{% endif %}
+</div>
+
+<aside class="now-viewing" id="now-viewing" aria-live="polite" aria-label="Đang xem">
+  <p class="eyebrow mono">Now viewing</p>
+  <p class="nv-title" id="nv-title"></p>
+  <dl class="nv-meta mono" id="nv-meta"></dl>
+</aside>
+
+<div class="progress" id="progress" role="progressbar" aria-label="Tiến độ trong tập kết quả"
+     aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="progress-fill" id="progress-fill"></span></div>
+
+<div class="hints mono" id="hints" aria-hidden="true">
+  <span class="hint-a"></span><span class="hint-b"></span><span class="hint-c"></span>
+</div>
+
+<section class="results" aria-label="Kết quả tìm kiếm">
+  <h2 class="sr-only">Kết quả{% if boot.query %} cho “{{ boot.query }}”{% endif %}</h2>
+  <ol class="result-list" id="result-list">
+    {% if initial %}{% for row in initial.results %}
+    <li><a href="{{ row.detail_url }}?{{ detail_query }}">
+      <span class="r-rank">#{{ row.rank }}</span>
+      <span class="r-title">{{ row.title or row.video_id }}</span>
+      <span class="r-meta">{{ row.video_id }} · {{ "%.1f"|format(row.pts_time) }}s{% if row.evidence %} · {{ row.evidence }}{% endif %}</span>
+    </a></li>
+    {% endfor %}{% endif %}
+  </ol>
+</section>
+<noscript><p class="noscript">Trang tương tác cần JavaScript. <a href="/list{% if boot.query %}?q={{ boot.query|urlencode }}{% endif %}">Mở danh sách kết quả</a>.</p></noscript>
+
+<script type="application/json" id="archive-boot">{{ boot|tojson }}</script>
+{% endblock %}
+{% block scripts %}<script type="module" src="/static/orbit/archive.js?v={{ asset_version('orbit/archive.js') }}"></script>{% endblock %}
