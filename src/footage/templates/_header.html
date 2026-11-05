@@ -1,0 +1,40 @@
+{%- set label = (settings.archive_label if settings else "THƯ VIỆN SỐ / VIDEO ARCHIVE") -%}
+{%- set view_now = active_view|default(None) -%}
+{%- set q_now = nav_q|default("") -%}
+<header class="site-header">
+  <a class="brand" href="/">{% for part in label.split("/") %}{% if not loop.first %}<span class="brand-sep" aria-hidden="true"> / </span>{% endif %}<span>{{ part.strip() }}</span>{% endfor %}</a>
+  <nav class="views" aria-label="Chế độ xem kho lưu trữ">
+    {% for code, name in (views|default({"ring": "Ring", "corridor": "Corridor", "constellation": "Constellation"})).items() %}
+    <a class="view-link{% if view_now == code %} is-active{% endif %}" data-view="{{ code }}"
+       href="/?view={{ code }}{% if q_now %}&amp;q={{ q_now|urlencode }}{% endif %}"
+       {% if view_now == code %}aria-current="page"{% endif %}><span class="view-num">0{{ loop.index }}</span><span class="view-name">{{ name|upper }}</span></a>
+    {% endfor %}
+  </nav>
+  <div class="account">
+    {% if user %}
+    <details class="user-menu">
+      <summary>
+        <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span class="user-name">{{ user.full_name or user.username }}</span>
+        <svg class="caret" viewBox="0 0 12 12" aria-hidden="true"><path d="M2 4l4 4 4-4z"/></svg>
+      </summary>
+      <div class="menu" role="menu">
+        <div class="menu-id">
+          <strong>{{ user.full_name or user.username }}</strong>
+          <span class="mono">@{{ user.username }}</span>
+          {% if roles_of_user %}<span class="mono muted">{% for role in roles_of_user %}{{ (role_labels|default({})).get(role, role) }}{% if not loop.last %} · {% endif %}{% endfor %}</span>{% endif %}
+        </div>
+        <a role="menuitem" href="/">Kho lưu trữ</a>
+        <a role="menuitem" href="/requests">Yêu cầu khai thác</a>
+        <a role="menuitem" href="/list{% if q_now %}?q={{ q_now|urlencode }}{% endif %}">Danh sách kết quả</a>
+        {% if user.can('eval.view') %}<a role="menuitem" href="/eval">Đánh giá tìm kiếm</a>{% endif %}
+        {% if user.can('user.manage') %}<a role="menuitem" href="/admin/users">Quản lý tài khoản</a>{% endif %}
+        <form method="post" action="/logout"><button type="submit" role="menuitem" class="menu-logout">Đăng xuất</button></form>
+      </div>
+    </details>
+    {% else %}
+    <a href="/login{% if request %}?next={{ (request.url.path ~ ('?' ~ request.url.query if request.url.query else ''))|urlencode }}{% endif %}">Đăng nhập</a>
+    {% if self_registration|default(true) %}<span class="sep" aria-hidden="true">/</span><a href="/register">Tạo tài khoản</a>{% endif %}
+    {% endif %}
+  </div>
+</header>
