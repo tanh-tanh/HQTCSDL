@@ -121,6 +121,17 @@ video: bộ sưu tập, đơn vị, chủ đề; chọn đoạn cho yêu cầu �
 (bạn đọc gửi và theo dõi yêu cầu của mình; cán bộ thư viện xem mọi yêu cầu, cấp phép hoặc từ
 chối), **Đánh giá** và **Tài khoản** (quản trị).
 
+### Giao diện lưu trữ 3D (RING · CORRIDOR · CONSTELLATION)
+
+Trang chủ `/` là giao diện 3D: kéo để xoay vòng kết quả (RING), cuộn để đi xuyên hành lang
+(CORRIDOR), kéo để xoay đám mây (CONSTELLATION); nhấp một khung hình để mở trang chi tiết. Ba chế
+độ dùng chung một truy vấn và cùng gọi `sp_search_footage`. Dạng danh sách cũ vẫn ở `/list`.
+Khách vào được trang mở đầu và có thể tự tạo tài khoản bạn đọc ở `/register`
+(`ARCHIVE_SELF_REGISTRATION=0` để tắt). CSDL đã tạo trước bản này cần chạy thêm
+`db/migrations/001_self_registration.sql`. Bundle giao diện đã build sẵn trong
+`src/footage/static/orbit/`; chỉ cần Node khi sửa `frontend/` (`npm ci && npm run build`).
+Chi tiết: `docs/ORBIT_IMPLEMENTATION.md`.
+
 ### Tải dữ liệu (càng ít càng tốt)
 
 Dữ liệu mẫu đã có sẵn trong `db/09_sample_data.sql`. Ảnh và kênh hình ảnh cần tải thêm từ

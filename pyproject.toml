@@ -39,7 +39,7 @@ dev = [
 where = ["src"]
 
 [tool.setuptools.package-data]
-footage = ["templates/*.html", "static/*"]
+footage = ["templates/*.html", "static/*", "static/orbit/*", "static/fonts/*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
