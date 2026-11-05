@@ -11,11 +11,11 @@ from urllib.parse import urlencode
 
 import pyodbc
 from fastapi import Depends, FastAPI, Form, Query, Request
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, RedirectResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from footage import auth
+from footage import archive, auth
 from footage.config import Settings, load_settings
 from footage.db import call, connect, error_number, execute, query, query_one, set_actor
 from footage.search import SOURCE_LABELS, SOURCES, log_search, run_search
@@ -38,6 +38,12 @@ STATUSES = {"pending": "Chờ xử lý", "approved": "Đã cấp phép", "reject
 LICENSE_DAYS = (30, 90, 180, 365)
 USER_TYPES = {"staff": "Cán bộ", "journalist": "Nhà báo", "researcher": "Nhà nghiên cứu",
               "student": "Sinh viên", "other": "Khác"}
+# Self-registration never offers "staff": that type is set by an administrator.
+PUBLIC_USER_TYPES = {code: label for code, label in USER_TYPES.items() if code != "staff"}
+ROLE_LABELS = {"reader": "Bạn đọc", "librarian": "Cán bộ thư viện", "admin": "Quản trị"}
+VIEW_LABELS = {"ring": "Ring", "corridor": "Corridor", "constellation": "Constellation"}
+LOGIN_FAILURES = (10, 300)      # failed logins per client per 5 minutes
+REGISTRATIONS = (5, 3600)       # new accounts per client per hour
 
 
 class LoginRequired(Exception):
@@ -117,7 +123,28 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
         if user is None:
             raise LoginRequired()
         set_actor(connection, user.user_id)
+        user.roles = archive.user_roles(connection, user.user_id)
         return user
+
+    def optional_user(request: Request, connection=Depends(database)) -> auth.User | None:
+        user = auth.session_user(connection, request.cookies.get(auth.SESSION_COOKIE))
+        if user is not None:
+            set_actor(connection, user.user_id)
+            user.roles = archive.user_roles(connection, user.user_id)
+        return user
+
+    # Exposed so a development harness can override them (dependency_overrides).
+    app.state.database = database
+    app.state.current_user = current_user
+    app.state.optional_user = optional_user
+    app.state.login_failures = archive.RateLimiter(*LOGIN_FAILURES)
+    app.state.registrations = archive.RateLimiter(*REGISTRATIONS)
+
+    def is_api(request: Request) -> bool:
+        return request.url.path.startswith("/api/")
+
+    def client_key(request: Request) -> str:
+        return request.client.host if request.client else "unknown"
 
     def require(permission: str):
         def check(user: auth.User = Depends(current_user)) -> auth.User:
@@ -128,11 +155,18 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
 
     @app.exception_handler(LoginRequired)
     def to_login(request: Request, _: LoginRequired):
+        if is_api(request):
+            return JSONResponse({"error": "login_required", "message": "Cần đăng nhập."},
+                                status_code=401)
         target = request.url.path + (f"?{request.url.query}" if request.url.query else "")
         return RedirectResponse("/login?" + urlencode({"next": target}), status_code=303)
 
     @app.exception_handler(Forbidden)
     def forbidden(request: Request, _: Forbidden):
+        if is_api(request):
+            return JSONResponse({"error": "forbidden",
+                                 "message": "Tài khoản của bạn không có quyền thực hiện thao tác này."},
+                                status_code=403)
         return templates.TemplateResponse(
             request, "message.html",
             {"user": None, "title": "Không có quyền",
@@ -146,18 +180,34 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
         number = error_number(exc)
         if number == PERMISSION_DENIED:
             return forbidden(request, Forbidden())
-        if number in WORKFLOW_ERRORS:
+        if number in WORKFLOW_ERRORS and not is_api(request):
             return templates.TemplateResponse(
                 request, "message.html",
                 {"user": None, "title": "Không thực hiện được", "message": WORKFLOW_ERRORS[number]},
                 status_code=409,
             )
+        if is_api(request):
+            log.exception("database error on %s", request.url.path)
+            return JSONResponse({"error": "database", "message": "Lỗi cơ sở dữ liệu."},
+                                status_code=500)
         raise exc
 
-    def render(request: Request, name: str, user: auth.User | None, **context):
+    def render(request: Request, name: str, user: auth.User | None, status_code: int = 200,
+               **context):
+        context.setdefault("roles_of_user", (user.roles or []) if user else [])
+        context.setdefault("nav_q", request.query_params.get("q", ""))
+        context.setdefault("active_view", None)
         context.update(user=user, visual=app.state.visual, settings=settings,
-                       purposes=PURPOSES, statuses=STATUSES, user_types=USER_TYPES)
-        return templates.TemplateResponse(request, name, context)
+                       purposes=PURPOSES, statuses=STATUSES, user_types=USER_TYPES,
+                       role_labels=ROLE_LABELS, views=VIEW_LABELS,
+                       self_registration=settings.self_registration,
+                       asset_version=assets_version)
+        return templates.TemplateResponse(request, name, context, status_code=status_code)
+
+    static_dir = HERE / "static"
+
+    def assets_version(name: str) -> str:
+        return archive.asset_version(static_dir / name)
 
     def back(request: Request, fallback: str) -> str:
         referer = request.headers.get("referer", "")
@@ -169,6 +219,22 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
     # Login
     # ------------------------------------------------------------------
 
+    def safe_next(next: str) -> str:
+        # Only local paths, so a crafted link cannot bounce to another site.
+        return next if next.startswith("/") and not next.startswith("//") and "\\" not in next else "/"
+
+    def signed_in(user_id: int, connection, request: Request, target: str, action: str):
+        token = auth.create_session(connection, user_id, settings.session_hours)
+        execute(connection,
+                "INSERT INTO dbo.audit_log (user_id, action, detail) VALUES (?, ?, ?)",
+                user_id, action, client_key(request))
+        response = RedirectResponse(safe_next(target), status_code=303)
+        response.set_cookie(
+            auth.SESSION_COOKIE, token, max_age=settings.session_hours * 3600,
+            httponly=True, samesite="lax", secure=settings.secure_cookies,
+        )
+        return response
+
     @app.get("/login", response_class=HTMLResponse)
     def login_form(request: Request, next: str = "/"):
         return render(request, "login.html", None, next=next, error=None)
@@ -176,24 +242,75 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
     @app.post("/login")
     def login(request: Request, username: str = Form(...), password: str = Form(...),
               next: str = Form("/"), connection=Depends(database)):
+        key = client_key(request)
+        limiter = app.state.login_failures
+        if limiter.blocked(key):
+            return render(request, "login.html", None, status_code=429, next=next,
+                          error="Đăng nhập sai quá nhiều lần. Vui lòng thử lại sau vài phút.")
         user = auth.authenticate(connection, username, password)
         if user is None:
-            return templates.TemplateResponse(
-                request, "login.html",
-                {"user": None, "next": next, "error": "Sai tên đăng nhập hoặc mật khẩu."},
-                status_code=401,
-            )
-        token = auth.create_session(connection, user.user_id, settings.session_hours)
-        execute(connection,
-                "INSERT INTO dbo.audit_log (user_id, action, detail) VALUES (?, 'login', ?)",
-                user.user_id, request.client.host if request.client else "")
-        # Only local paths, so a crafted link cannot bounce to another site.
-        target = next if next.startswith("/") and not next.startswith("//") else "/"
-        response = RedirectResponse(target, status_code=303)
-        response.set_cookie(
-            auth.SESSION_COOKIE, token, max_age=settings.session_hours * 3600,
-            httponly=True, samesite="lax", secure=settings.secure_cookies,
-        )
+            limiter.hit(key)
+            return render(request, "login.html", None, status_code=401, next=next,
+                          error="Sai tên đăng nhập hoặc mật khẩu.")
+        return signed_in(user.user_id, connection, request, next, "login")
+
+    # ------------------------------------------------------------------
+    # Self-registration: reader accounts only (sp_register_reader)
+    # ------------------------------------------------------------------
+
+    def register_page(request: Request, next: str, error: str | None, form: dict | None = None,
+                      status_code: int = 200):
+        token = request.cookies.get(archive.CSRF_COOKIE) or archive.new_csrf_token()
+        response = render(request, "register.html", None, status_code=status_code, next=next,
+                          error=error, form=form or {}, csrf_token=token,
+                          public_user_types=PUBLIC_USER_TYPES)
+        response.set_cookie(archive.CSRF_COOKIE, token, max_age=3600, httponly=True,
+                            samesite="strict", secure=settings.secure_cookies)
+        return response
+
+    @app.get("/register", response_class=HTMLResponse)
+    def register_form(request: Request, next: str = "/"):
+        if not settings.self_registration:
+            return render(request, "message.html", None, status_code=404, title="Không mở đăng ký",
+                          message="Thư viện chưa mở đăng ký công khai. Liên hệ quản trị viên để được cấp tài khoản.")
+        return register_page(request, next, None)
+
+    @app.post("/register")
+    def register(request: Request, username: str = Form(...), password: str = Form(...),
+                 password_confirm: str = Form(...), full_name: str = Form(""),
+                 user_type: str = Form("other"), csrf_token: str = Form(""),
+                 next: str = Form("/"), connection=Depends(database)):
+        if not settings.self_registration:
+            return render(request, "message.html", None, status_code=404, title="Không mở đăng ký",
+                          message="Thư viện chưa mở đăng ký công khai.")
+        form = {"username": username, "full_name": full_name, "user_type": user_type}
+        if not archive.csrf_ok(request.cookies.get(archive.CSRF_COOKIE), csrf_token):
+            return register_page(request, next, "Phiên biểu mẫu đã hết hạn, vui lòng gửi lại.",
+                                 form, status_code=400)
+        key = client_key(request)
+        if app.state.registrations.blocked(key):
+            return register_page(request, next, "Đã tạo quá nhiều tài khoản từ thiết bị này. Thử lại sau.",
+                                 form, status_code=429)
+        username = username.strip().lower()
+        problem = auth.validate_new_password(password)
+        if not archive.USERNAME.fullmatch(username):
+            problem = "Tên đăng nhập gồm 3–32 ký tự a-z, 0-9, dấu _ . -"
+        elif password != password_confirm:
+            problem = "Hai lần nhập mật khẩu không khớp."
+        if problem:
+            return register_page(request, next, problem, form, status_code=400)
+        try:
+            user_id = auth.register_reader(connection, username, password, full_name.strip()[:100],
+                                           user_type if user_type in PUBLIC_USER_TYPES else "other")
+        except pyodbc.IntegrityError as exc:
+            if error_number(exc) not in (*DUPLICATE_KEY, FOREIGN_KEY_VIOLATION):
+                raise
+            connection.rollback()
+            return register_page(request, next, "Tên đăng nhập đã có người dùng.", form,
+                                 status_code=409)
+        app.state.registrations.hit(key)
+        response = signed_in(user_id, connection, request, next, "login")
+        response.delete_cookie(archive.CSRF_COOKIE)
         return response
 
     @app.post("/logout")
@@ -215,7 +332,127 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
             "ORDER BY CASE origin WHEN 'user' THEN 0 ELSE 1 END, request_id",
         )
 
+    def timeout_message(exc: pyodbc.OperationalError) -> str:
+        # ODBC cancelled the statement on the server (HYT00 = timeout).
+        reason = "quá thời gian" if "HYT00" in str(exc) else "lỗi"
+        return f"Truy vấn bị huỷ ({reason}, giới hạn {settings.search_timeout}s)."
+
+    def visual_status() -> str:
+        return app.state.visual.status if app.state.visual else "tắt (chưa cấu hình index SigLIP2)"
+
+    def boot_user(user: auth.User | None) -> dict | None:
+        if user is None:
+            return None
+        return {"name": user.full_name or user.username, "username": user.username,
+                "roles": [ROLE_LABELS.get(role, role) for role in (user.roles or [])],
+                "permissions": sorted(user.permissions)}
+
+    def archive_boot(request: Request, user: auth.User | None, *, view: str, q: str,
+                     top_k: int, chosen: list[str], collection: int | None, topic: int | None,
+                     request_id: str, options: dict, requests: list[dict],
+                     initial: dict | None, error: str | None) -> dict:
+        links = {"login": "/login?" + urlencode({"next": str(request.url.path) + (
+                     f"?{request.url.query}" if request.url.query else "")}),
+                 "register": "/register" if settings.self_registration else None}
+        if user is not None:
+            links.update(requests="/requests", list="/list",
+                         eval="/eval" if user.can("eval.view") else None,
+                         users="/admin/users" if user.can("user.manage") else None)
+        return {
+            "label": settings.archive_label,
+            "user": boot_user(user),
+            "links": links,
+            "view": view,
+            "query": q,
+            "k": top_k,
+            "top_k_choices": list(archive.TOP_K_CHOICES),
+            "sources": [{"code": code, "label": SOURCE_LABELS[code], "checked": code in chosen}
+                        for code in SOURCES],
+            "visual": visual_status(),
+            "filters": {"collection": collection, "topic": topic},
+            "options": options,
+            "request_id": request_id,
+            "requests": [{"id": row["request_id"], "text": row["request_text"],
+                          "status": STATUSES.get(row["status"], row["status"]),
+                          "verified": bool(row["has_ground_truth"])} for row in requests],
+            "initial": initial,
+            "error": error,
+        }
+
     @app.get("/", response_class=HTMLResponse)
+    def archive_page(request: Request, q: str = "", request_id: str = "", k: int = 50,
+                     src: list[str] | None = Query(None), view: str = "ring",
+                     collection: str = "", topic: str = "",
+                     user: auth.User | None = Depends(optional_user),
+                     connection=Depends(database)):
+        view = view if view in archive.VIEWS else "ring"
+        top_k = archive.clamp_k(k)
+        chosen = archive.chosen_sources(src)
+        collection_id, topic_id = archive.parse_id(collection), archive.parse_id(topic)
+        if user is None:
+            # The landing shell is public; any query or image needs an account.
+            if q.strip() or request_id:
+                raise LoginRequired()
+            boot = archive_boot(request, None, view=view, q="", top_k=top_k, chosen=chosen,
+                                collection=None, topic=None, request_id="",
+                                options={"topics": [], "collections": []}, requests=[],
+                                initial=None, error=None)
+            return render(request, "archive.html", None, boot=boot, initial=None, active_view=view)
+        if not user.can("search.run"):
+            raise Forbidden()
+        queries = request_list(connection)
+        if request_id and not q:
+            q = next((row["request_text"] for row in queries if row["request_id"] == request_id), "")
+        options = archive.filter_options(connection)
+        initial, error = None, None
+        try:
+            if q.strip():
+                initial = archive.search_payload(
+                    connection, text=q, sources=chosen, top_k=top_k, pool=settings.search_pool,
+                    visual=app.state.visual, user_id=user.user_id, collection_id=collection_id,
+                    topic_id=topic_id, runner=run_search)
+            else:
+                initial = archive.browse_payload(connection, collection_id=collection_id,
+                                                 topic_id=topic_id)
+        except pyodbc.OperationalError as exc:
+            connection.rollback()
+            error = timeout_message(exc)
+        boot = archive_boot(request, user, view=view, q=q, top_k=top_k, chosen=chosen,
+                            collection=collection_id, topic=topic_id, request_id=request_id,
+                            options=options, requests=queries, initial=initial, error=error)
+        detail_query = urlencode({key: value for key, value in
+                                  (("request_id", request_id), ("q", q.strip()), ("view", view)) if value})
+        return render(request, "archive.html", user, boot=boot, initial=initial, error=error,
+                      active_view=view, nav_q=q, detail_query=detail_query)
+
+    @app.get("/api/search")
+    def api_search(q: str = "", k: int = 50, src: list[str] | None = Query(None),
+                   collection: str = "", topic: str = "",
+                   user: auth.User = Depends(require("search.run")),
+                   connection=Depends(database)):
+        top_k = archive.clamp_k(k)
+        collection_id, topic_id = archive.parse_id(collection), archive.parse_id(topic)
+        try:
+            if not q.strip():
+                return archive.browse_payload(connection, collection_id=collection_id,
+                                              topic_id=topic_id)
+            return archive.search_payload(
+                connection, text=q.strip()[:2000], sources=archive.chosen_sources(src), top_k=top_k,
+                pool=settings.search_pool, visual=app.state.visual, user_id=user.user_id,
+                collection_id=collection_id, topic_id=topic_id, runner=run_search)
+        except pyodbc.OperationalError as exc:
+            connection.rollback()
+            return JSONResponse({"error": "timeout", "message": timeout_message(exc)},
+                                status_code=504)
+
+    @app.get("/api/browse")
+    def api_browse(collection: str = "", topic: str = "",
+                   user: auth.User = Depends(require("search.run")),
+                   connection=Depends(database)):
+        return archive.browse_payload(connection, collection_id=archive.parse_id(collection),
+                                      topic_id=archive.parse_id(topic))
+
+    @app.get("/list", response_class=HTMLResponse)
     def search_page(request: Request, q: str = "", request_id: str = "", k: int = 50,
                     src: list[str] | None = Query(None),
                     user: auth.User = Depends(require("search.run")),
@@ -241,7 +478,8 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
                       queries=queries, outcome=outcome, error=error)
 
     @app.get("/frames/{keyframe_id}", response_class=HTMLResponse)
-    def frame_page(request: Request, keyframe_id: int, request_id: str = "",
+    def frame_page(request: Request, keyframe_id: int, request_id: str = "", q: str = "",
+                   view: str = "ring",
                    user: auth.User = Depends(require("search.run")),
                    connection=Depends(database)):
         frame = query_one(
@@ -286,9 +524,15 @@ def create_app(settings: Settings | None = None, visual=None) -> FastAPI:
         )
         # Clips can only be added to requests that are still pending.
         pending = [row for row in request_list(connection) if row["status"] == "pending"]
+        view = view if view in archive.VIEWS else "ring"
+        back = "/?" + urlencode({key: value for key, value in
+                                 (("q", q), ("view", view), ("request_id", request_id)) if value})
+        context_query = urlencode({key: value for key, value in
+                                   (("request_id", request_id), ("q", q), ("view", view)) if value})
         return render(request, "frame.html", user, frame=frame, neighbours=neighbours,
                       speech=speech, chosen_for=chosen_for, queries=pending,
-                      request_id=request_id)
+                      request_id=request_id, back_url=back, context_query=context_query,
+                      active_view=view, nav_q=q)
 
     @app.get("/img/{keyframe_id}")
     def image(keyframe_id: int, user: auth.User = Depends(require("search.run")),
