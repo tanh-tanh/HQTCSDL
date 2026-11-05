@@ -1,9 +1,10 @@
 {% extends "base.html" %}
 {% block title %}{{ title }} · Thư viện số nghe nhìn{% endblock %}
 {% block content %}
-<section class="card narrow">
+<section class="auth">
+  <p class="eyebrow">Thư viện số · Video archive</p>
   <h1>{{ title }}</h1>
-  <p>{{ message }}</p>
-  <p><a href="/">Về trang tìm kiếm</a></p>
+  <p class="lede">{{ message }}</p>
+  <p><a class="button ghost" href="/">Về kho lưu trữ</a></p>
 </section>
 {% endblock %}

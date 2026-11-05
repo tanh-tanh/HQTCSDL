@@ -1,12 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ frame.video_id }} {{ frame.pts_time }}s · Thư viện số nghe nhìn{% endblock %}
 {% block content %}
+<a class="back-link" href="{{ back_url|default('/') }}">← Quay lại kết quả</a>
 <section class="frame-layout">
   <div>
     <img class="hero" src="/img/{{ frame.keyframe_id }}" alt="{{ frame.video_id }}">
     <div class="strip">
       {% for item in neighbours %}
-      <a href="/frames/{{ item.keyframe_id }}{% if request_id %}?request_id={{ request_id }}{% endif %}"
+      <a href="/frames/{{ item.keyframe_id }}{% if context_query %}?{{ context_query }}{% endif %}"
          class="{% if item.keyframe_id == frame.keyframe_id %}current{% endif %}">
         <img src="/img/{{ item.keyframe_id }}" loading="lazy" alt="">
         <span>{{ "%.1f"|format(item.pts_time) }}s</span>
@@ -14,8 +15,9 @@
       {% endfor %}
     </div>
   </div>
-  <aside class="card stack">
-    <h1>{{ frame.title }} · {{ "%.2f"|format(frame.pts_time) }}s</h1>
+  <aside class="stack">
+    <p class="eyebrow">Khung hình · {{ frame.video_id }} · {{ "%.2f"|format(frame.pts_time) }}s</p>
+    <h1 class="frame-title">{{ frame.title }} · {{ "%.2f"|format(frame.pts_time) }}s</h1>
     <dl class="facts">
       <dt>bộ sưu tập</dt><dd>{{ frame.collection_title }}</dd>
       <dt>đơn vị</dt><dd>{{ frame.owner }}</dd>
