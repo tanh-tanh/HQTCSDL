@@ -25,8 +25,9 @@ Toàn bộ thiết kế được cài đặt bằng T-SQL và chạy trên SQL S
     \item 128 ràng buộc có tên (30 PK, 37 FK, 13 UQ, 24 CK, 24 DF) và 109 cột NOT NULL;
     \item 5 hàm, trong đó có một hàm tất định dùng cho cột tính toán và một hàm bảng dùng CTE
     đệ quy;
-    \item 9 thủ tục lưu trữ, có giao dịch tường minh, khoá \texttt{UPDLOCK} chống duyệt trùng,
-    \texttt{SEQUENCE} sinh mã và tham số OUTPUT;
+    \item 10 thủ tục lưu trữ, có giao dịch tường minh, khoá \texttt{UPDLOCK} chống duyệt trùng,
+    \texttt{SEQUENCE} sinh mã, tham số OUTPUT, và một thủ tục tự đăng ký khoá cứng quyền ngay
+    trong CSDL;
     \item 11 view, có một view cập nhật được với \texttt{WITH CHECK OPTION};
     \item 6 trigger ghi nhật ký;
     \item phân quyền hai tầng: theo vai trò nghiệp vụ (bạn đọc, cán bộ thư viện, quản trị)
@@ -41,9 +42,11 @@ giảm số trang phải đọc từ 43 xuống 4 so với \texttt{LIKE} và ch�
 
 Một tệp script dựng lại toàn bộ CSDL cùng dữ liệu mẫu (25 video và danh mục minh hoạ) trong
 khoảng 5 giây. 25 truy vấn nghiệp vụ và bộ kiểm thử ràng buộc, giao dịch, phân quyền, chỉ mục,
-nhất quán chạy không lỗi; 64 kiểm thử tự động đều qua. Trên 120 yêu cầu khai thác mẫu đã xác
+nhất quán chạy không lỗi; 67 kiểm thử tự động đều qua. Trên 120 yêu cầu khai thác mẫu đã xác
 minh, gộp ba nguồn (hình ảnh, chữ, lời nói) đạt Recall@100 = 0,525, cao hơn từng nguồn riêng
-lẻ (0,358 và 0,308). Mọi lượt tìm xong dưới 0,6 giây, đáp ứng yêu cầu 30 giây.
+lẻ (0,358 và 0,308). Mọi lượt tìm xong dưới 0,6 giây, đáp ứng yêu cầu 30 giây. Ứng dụng
+có giao diện lưu trữ 3D với ba cách trình bày kết quả, bộ lọc theo cây chủ đề và bộ sưu tập
+dùng hàm đệ quy của CSDL, và trang tự đăng ký tài khoản bạn đọc.
 
 \section*{2. Hạn chế}
 \addcontentsline{toc}{section}{2. Hạn chế}
@@ -60,6 +63,10 @@ lẻ (0,358 và 0,308). Mọi lượt tìm xong dưới 0,6 giây, đáp ứng y
     \item Kênh hình ảnh nằm ngoài CSDL vì SQL Server 2017--2022 không có kiểu dữ liệu vector.
     \item Chỉ mục ngược và nhãn chủ đề được lập lại theo lô chứ chưa cập nhật tức thời khi kho
     nhận video mới.
+    \item Cờ bật/tắt tự đăng ký chỉ được kiểm tra ở tầng web; thủ tục
+    \texttt{sp\_register\_reader} vẫn gọi được khi cờ tắt, dù chỉ tạo được tài khoản bạn đọc.
+    \item Giao diện 3D tải ảnh khung hình gốc (khoảng 170 KB mỗi ảnh) cho cả các ô nhỏ, nên chế
+    độ Constellation cần 10--20 giây để hiện đủ 50 kết quả.
 \end{itemize}
 
 \section*{3. Hướng phát triển}
@@ -68,6 +75,8 @@ lẻ (0,358 và 0,308). Mọi lượt tìm xong dưới 0,6 giây, đáp ứng y
 \begin{itemize}
     \item Dùng mức truy cập của bộ sưu tập trong thủ tục: bạn đọc chỉ xuất được đoạn tư liệu
     thuộc bộ sưu tập hạn chế khi có giấy phép còn hiệu lực.
+    \item Sinh sẵn ảnh thu nhỏ cho từng khung hình để giao diện 3D và trang chi tiết tải nhanh
+    hơn.
     \item Thêm phạm vi giấy phép theo từng đoạn tư liệu, gia hạn và thu hồi giấy phép, kèm
     thông báo cho bạn đọc trước ngày hết hạn.
     \item Lưu luật gắn chủ đề trong bảng để cán bộ thư viện chỉnh sửa, và để chủ đề được gắn

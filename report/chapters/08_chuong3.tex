@@ -21,7 +21,7 @@ triển (SQL Server 2025 Express), việc này mất khoảng 4,9 giây.
 \texttt{02\_tables.sql} & 30 bảng, 1 \texttt{SEQUENCE}, ràng buộc đặt tên và chỉ mục \\
 \texttt{03\_functions.sql} & \texttt{fn\_tokens}, \texttt{fn\_nearest\_keyframe}, \texttt{fn\_has\_permission}, \texttt{fn\_topic\_subtree} \\
 \texttt{04\_views.sql} & 11 view \\
-\texttt{05\_procedures.sql} & 9 thủ tục lưu trữ \\
+\texttt{05\_procedures.sql} & 10 thủ tục lưu trữ \\
 \texttt{06\_triggers.sql} & 6 trigger ghi nhật ký \\
 \texttt{07\_seed.sql} & Quyền, vai trò, cây chủ đề, nguồn tìm kiếm, từ dừng \\
 \texttt{08\_security.sql} & Role và người dùng CSDL, cấp quyền \\
@@ -29,6 +29,7 @@ triển (SQL Server 2025 Express), việc này mất khoảng 4,9 giây.
 \texttt{10\_queries.sql} & 25 truy vấn nghiệp vụ (chỉ đọc) \\
 \texttt{11\_tests.sql} & Kiểm thử ràng buộc, giao dịch, phân quyền, chỉ mục, nhất quán (luôn rollback) \\
 \texttt{full\_setup.sql} & Ghép 00--09 thành một tệp \\
+\texttt{migrations/001\_...} & Thêm \texttt{sp\_register\_reader} vào CSDL đã tạo từ bản trước (có bản \texttt{\_down} để gỡ) \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -167,7 +168,7 @@ Gọi với chủ đề ``Đua xe đạp'' trả về 13 dòng ở ba mức (0--
 
 \section{Thủ tục lưu trữ}
 
-Bảng~\ref{tab:procedures} liệt kê chín thủ tục. Người đang thao tác được ứng dụng đặt vào
+Bảng~\ref{tab:procedures} liệt kê mười thủ tục. Người đang thao tác được ứng dụng đặt vào
 ngữ cảnh phiên bằng \texttt{sp\_set\_session\_context N'app\_user\_id', <id>, @read\_only = 1}.
 Vì vậy các thủ tục ghi không nhận \texttt{user\_id} qua tham số, tức không tin vào giá trị do
 bên gọi tự khai.
@@ -188,6 +189,7 @@ bên gọi tự khai.
 \texttt{sp\_grant\_license} & Duyệt yêu cầu: tạo giấy phép và đổi trạng thái trong một giao dịch \\
 \texttt{sp\_reject\_request} & Từ chối yêu cầu đang chờ \\
 \texttt{sp\_create\_user} & Tạo tài khoản (kèm đơn vị, đối tượng) và gán vai trò trong một giao dịch \\
+\texttt{sp\_register\_reader} & Khách tự đăng ký: luôn chỉ cấp vai trò \texttt{reader} (mục~\ref{sec:register}) \\
 \texttt{sp\_progress\_report} & Báo cáo tiến độ, trả kết quả qua ba tham số \texttt{OUTPUT} \\
 \texttt{sp\_rebuild\_text\_index} & Lập lại chỉ mục ngược từ toàn bộ OCR và ASR \\
 \bottomrule
@@ -470,7 +472,7 @@ dùng CSDL được tạo \texttt{WITHOUT LOGIN} và thuộc các role trong B�
 \textbf{Role / user} & \textbf{Quyền} \\
 \midrule
 \texttt{archive\_reader} & \texttt{SELECT} trên schema \texttt{dbo}; \texttt{EXECUTE} \texttt{sp\_search\_footage}, \texttt{sp\_progress\_report} và hai hàm đọc \\
-\texttt{archive\_writer} & \texttt{INSERT/DELETE} phiên, \texttt{UPDATE} tài khoản, \texttt{INSERT/DELETE} vai trò của người dùng, \texttt{INSERT} nhật ký và đánh giá; \texttt{EXECUTE} các thủ tục ghi. Không ghi trực tiếp vào \texttt{requests}, \texttt{selections}, \texttt{usage\_licenses}, không sửa danh mục và dữ liệu video, không có DDL \\
+\texttt{archive\_writer} & \texttt{INSERT/DELETE} phiên, \texttt{UPDATE} tài khoản (không có \texttt{INSERT}: tài khoản mới chỉ tạo qua \texttt{sp\_create\_user}, \texttt{sp\_register\_reader}), \texttt{INSERT/DELETE} vai trò của người dùng, \texttt{INSERT} nhật ký và đánh giá; \texttt{EXECUTE} các thủ tục ghi. Không ghi trực tiếp vào \texttt{requests}, \texttt{selections}, \texttt{usage\_licenses}, không sửa danh mục và dữ liệu video, không có DDL \\
 \texttt{archive\_app} & Thành viên \texttt{archive\_reader} + \texttt{archive\_writer} (ứng dụng web) \\
 \texttt{archive\_report} & Thành viên \texttt{archive\_reader} (báo cáo, chỉ đọc) \\
 \bottomrule
@@ -655,7 +657,7 @@ chạy thì một số giấy phép ``sắp hết hạn'' sẽ chuyển sang ``�
 
 Tệp \texttt{11\_tests.sql} chạy mọi thay đổi trong giao dịch rồi \texttt{ROLLBACK}, nên chạy
 bao nhiêu lần dữ liệu cũng giữ nguyên. Kết quả đầy đủ nằm trong
-\texttt{docs/output/11\_tests.txt}. Ngoài ra, ứng dụng có 64 kiểm thử tự động (pytest)
+\texttt{docs/output/11\_tests.txt}. Ngoài ra, ứng dụng có 67 kiểm thử tự động (pytest)
 chạy trên CSDL tạm \texttt{video\_archive\_test}; tất cả đều qua.
 
 \subsection{Ràng buộc toàn vẹn}
@@ -723,6 +725,11 @@ DEFAULT & Thêm tài khoản chỉ có tên và mật khẩu & \texttt{full\_nam
     lỗi 50001 (thiếu quyền \texttt{selection.write}, \texttt{license.grant}).
     \item \textbf{C4.} Ngay cả cán bộ thư viện \texttt{thuthu1} cũng không thêm được đoạn tư liệu
     vào YC-001 vì yêu cầu này đã được cấp phép: lỗi 50005.
+    \item \textbf{C5. Tự đăng ký.} Với quyền \texttt{archive\_app}, gọi
+    \texttt{sp\_register\_reader} cho \texttt{'TuDangKy\_Demo '} với đối tượng sinh viên trong một
+    giao dịch: tài khoản được chuẩn hoá thành \texttt{tudangky\_demo}, chỉ có vai trò
+    \texttt{reader}, không có đơn vị; sau \texttt{ROLLBACK} không còn tài khoản nào. Gọi với mật
+    khẩu chưa băm bị từ chối (lỗi 50007); chèn thẳng vào \texttt{users} bị từ chối (lỗi 229).
 \end{itemize}
 
 \subsection{Hiệu quả của chỉ mục}
@@ -763,30 +770,104 @@ có giấy phép, trên 120 yêu cầu: 0 dòng lệch. Hai dư thừa có kiể
 
 \section{Ứng dụng minh hoạ}
 
+\subsection{Kiến trúc tầng giao diện}
+
 Ứng dụng web chạy bằng lệnh \texttt{footage serve} và kết nối SQL Server qua ODBC Driver 18.
 Mỗi yêu cầu HTTP mở một kết nối, hạ quyền xuống \texttt{archive\_app}, đặt ngữ cảnh phiên, rồi
 commit khi xử lý xong hoặc rollback khi có lỗi. Phiên đăng nhập là cookie
 \texttt{HttpOnly}, \texttt{SameSite=Lax}; bảng \texttt{sessions} chỉ lưu SHA-256 của cookie.
 Mật khẩu được băm bằng scrypt~\cite{rfc7914} với muối ngẫu nhiên.
 
+Giao diện có hai lớp dùng chung một bộ máy tìm kiếm:
+\begin{itemize}
+    \item \textbf{Giao diện lưu trữ 3D} ở trang chủ \texttt{/}, viết bằng TypeScript và
+    Three.js (mã nguồn trong \texttt{frontend/}, bản đã build nằm sẵn trong
+    \texttt{src/footage/static/orbit/}). Trang gọi hai API trả JSON: \texttt{/api/search}
+    (gọi \texttt{sp\_search\_footage} như mọi trang khác) và \texttt{/api/browse} (duyệt kho
+    khi chưa nhập mô tả). Kết quả được bổ sung nhan đề, bộ sưu tập, chủ đề từ view
+    \texttt{v\_video\_catalog}; trường nào CSDL không có thì gửi \texttt{null} và giao diện bỏ
+    qua, không tự sinh dữ liệu.
+    \item \textbf{Các trang HTML} render sẵn bằng Jinja2: danh sách kết quả \texttt{/list},
+    chi tiết khung hình, yêu cầu khai thác, đăng ký, quản trị tài khoản, đánh giá.
+\end{itemize}
+
+Bộ lọc \textbf{chủ đề} và \textbf{bộ sưu tập} trên thanh tìm kiếm được làm ở tầng CSDL: ứng
+dụng lấy tập video thoả bộ lọc bằng một truy vấn nối \texttt{videos}, \texttt{video\_topics}
+với hàm đệ quy \texttt{fn\_topic\_subtree}, nên chọn chủ đề cha ``Đua xe đạp'' là lấy cả mọi
+chủ đề con. Khi có bộ lọc, thủ tục được gọi với \texttt{@top\_k} lớn nhất (200) rồi mới lọc,
+để $K$ kết quả còn lại vẫn là $K$ kết quả tốt nhất trong phạm vi lọc. Ví dụ, lọc mô tả ``tay
+đua áo vàng về đích'' theo chủ đề ``Đồng Nai'' cho 50 kết quả nằm trong đúng 6 video thuộc
+chủ đề đó; lọc theo một bộ sưu tập chưa nạp video cho 0 kết quả.
+
+\subsection{Giao diện lưu trữ 3D}
+
+Khách chưa đăng nhập chỉ xem được trang mở đầu (Hình~\ref{fig:orbit_landing}): vòng 3D
+hiện các ô trống, mọi truy vấn và mọi ảnh khung hình đều đòi đăng nhập (API trả 401). Sau khi
+đăng nhập, cùng một kết quả tìm kiếm được trình bày theo ba cách
+(Hình~\ref{fig:orbit_views}):
+\begin{itemize}
+    \item \textbf{Ring}: kết quả xếp trên một vòng tròn, kéo để xoay;
+    \item \textbf{Corridor}: kết quả xếp hai bên một hành lang, cuộn để đi dọc theo thứ hạng,
+    khung ``Now viewing'' hiện phiếu mô tả của khung hình đang ở giữa;
+    \item \textbf{Constellation}: kết quả rải thành một đám mây trong không gian, kéo để xoay,
+    cuộn để phóng to; ô càng lớn là thứ hạng càng cao.
+\end{itemize}
+Nhấp vào một ô bất kỳ sẽ mở trang chi tiết của khung hình đó. Ảnh được tải theo thứ tự ưu
+tiên, sáu ảnh một lúc, nên với 50 kết quả, chế độ Constellation cần khoảng 10--20 giây để
+hiện đủ ảnh.
+
 \begin{figure}[H]
 \centering
-\includegraphics[width=0.95\textwidth]{app_search.png}
-\caption{Trang tra cứu: yêu cầu YC-047 gộp cả ba nguồn, khung hình đúng xếp hạng 1}
-\label{fig:app_search}
+\includegraphics[width=0.9\textwidth]{orbit_landing.png}
+\caption{Trang mở đầu công khai: khách chỉ thấy vòng trống, phải đăng nhập mới tra cứu được}
+\label{fig:orbit_landing}
 \end{figure}
 
-Hình~\ref{fig:app_search} là kết quả cán bộ thư viện nhận được cho yêu cầu mẫu YC-047
-(``Người áo trắng chỉ phải cạnh biển HỒNG THÁI PHÚC LỘC''). Khung hình đúng (L23\_V004, giây
-171,8) đứng đầu nhờ chữ OCR (hạng 2 trong nguồn OCR), còn kênh hình ảnh xếp nó hạng 30. Cả
-lượt tìm mất 300 ms. Dưới mỗi ảnh là cột \texttt{evidence} do thủ tục trả về.
+\begin{figure}[H]
+\centering
+\begin{subfigure}{\textwidth}
+\centering
+\includegraphics[width=0.82\textwidth]{orbit_ring.png}
+\caption{Ring}
+\end{subfigure}
+
+\vspace{0.4em}
+\begin{subfigure}{0.49\textwidth}
+\includegraphics[width=\textwidth]{orbit_corridor.png}
+\caption{Corridor}
+\end{subfigure}
+\hfill
+\begin{subfigure}{0.49\textwidth}
+\includegraphics[width=\textwidth]{orbit_constellation.png}
+\caption{Constellation}
+\end{subfigure}
+\caption{Ba chế độ hiển thị cùng một truy vấn ``tay đua áo vàng về đích'' (50 kết quả)}
+\label{fig:orbit_views}
+\end{figure}
+
+\subsection{Tra cứu dạng danh sách và chi tiết khung hình}
+
+Trang \texttt{/list} giữ dạng lưới truyền thống, thuận tiện khi cần đọc cột bằng chứng của
+từng kết quả. Hình~\ref{fig:app_search} là kết quả cán bộ thư viện nhận được cho yêu cầu mẫu
+YC-047 (``Người áo trắng chỉ phải cạnh biển HỒNG THÁI PHÚC LỘC''). Khung hình đúng
+(L23\_V004, giây 171,8) đứng đầu nhờ chữ OCR (hạng 2 trong nguồn OCR), còn kênh hình ảnh xếp
+nó hạng 30. Cả lượt tìm mất 291 ms. Dưới mỗi ảnh là cột \texttt{evidence} do thủ tục trả về.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{app_search.png}
+\caption{Trang tra cứu dạng danh sách: yêu cầu YC-047 gộp cả ba nguồn, khung hình đúng xếp hạng 1}
+\label{fig:app_search}
+\end{figure}
 
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{app_frame.png}
-\caption{Trang chi tiết khung hình: phiếu mô tả video (bộ sưu tập, đơn vị, mức truy cập, chủ đề), khung lân cận, chữ OCR, lời nói $\pm$15 giây, chọn đoạn cho yêu cầu đang chờ}
+\caption{Trang chi tiết khung hình: phiếu mô tả video (bộ sưu tập, đơn vị, mức truy cập, chủ đề), khung lân cận, chữ OCR, lời nói $\pm$15 giây}
 \label{fig:app_frame}
 \end{figure}
+
+\subsection{Yêu cầu khai thác}
 
 Trang ``Yêu cầu khai thác'' đọc từ \texttt{v\_request\_progress}. Cán bộ thư viện thấy mọi yêu
 cầu, lọc được theo trạng thái, và có nút cấp phép (chọn thời hạn) hoặc từ chối cho yêu cầu
@@ -810,6 +891,61 @@ hiển thị thông báo tương ứng.
 \label{fig:app_requests_reader}
 \end{figure}
 
+\subsection{Tự đăng ký tài khoản bạn đọc}
+\label{sec:register}
+
+Khách có thể tự tạo tài khoản bạn đọc ở trang \texttt{/register}
+(Hình~\ref{fig:orbit_register}); biến cấu hình \texttt{ARCHIVE\_SELF\_REGISTRATION=0} tắt
+trang này và khi đó chỉ quản trị viên tạo được tài khoản. Vì người đăng ký chưa có phiên làm
+việc, không thể dựa vào \texttt{SESSION\_CONTEXT} để kiểm tra quyền như các thủ tục ở trên.
+Thủ tục \texttt{sp\_register\_reader} vì thế tự khoá cứng những gì được phép:
+\begin{itemize}
+    \item luôn gán đúng vai trò \texttt{reader}, không nhận tham số vai trò, không gắn đơn vị;
+    đối tượng ngoài danh sách (kể cả \texttt{staff}) bị đổi thành \texttt{other};
+    \item từ chối mật khẩu chưa băm (giá trị không bắt đầu bằng \texttt{scrypt\$}) với lỗi
+    50007, nên dù tầng web có lỗi cũng không lưu được mật khẩu dạng rõ;
+    \item thêm người dùng, vai trò và dòng nhật ký \texttt{user.register} trong \textit{một}
+    giao dịch.
+\end{itemize}
+\texttt{archive\_app} chỉ được \texttt{EXECUTE} thủ tục này, không có quyền \texttt{INSERT} trên
+\texttt{users}. Ở tầng web, biểu mẫu có mã chống giả mạo yêu cầu (CSRF), mỗi thiết bị tạo tối
+đa 5 tài khoản mỗi giờ, và đăng nhập sai 10 lần trong 5 phút thì bị tạm khoá. CSDL đã tạo
+trước khi có tính năng này cần chạy thêm \texttt{db/migrations/001\_self\_registration.sql}.
+
+\begin{lstlisting}[caption={Phần lõi của sp\_register\_reader}, label={lst:register}]
+IF @user_type IS NULL OR @user_type NOT IN ('journalist', 'researcher', 'student', 'other')
+    SET @user_type = 'other';
+IF @password_hash IS NULL OR @password_hash NOT LIKE 'scrypt$%'
+    THROW 50007, N'Password must be hashed with scrypt', 1;
+BEGIN TRY
+    BEGIN TRANSACTION;
+        INSERT INTO dbo.users (username, full_name, password_hash, organization_id, user_type)
+        VALUES (LOWER(LTRIM(RTRIM(@username))), COALESCE(LTRIM(RTRIM(@full_name)), N''),
+                @password_hash, NULL, @user_type);
+        DECLARE @user_id INT = SCOPE_IDENTITY();
+        INSERT INTO dbo.user_roles (user_id, role_id)
+        SELECT @user_id, role_id FROM dbo.roles WHERE role_name = 'reader';
+        IF @@ROWCOUNT <> 1 THROW 50002, N'Role reader missing', 1;
+        INSERT INTO dbo.audit_log (user_id, action, detail)
+        VALUES (@user_id, 'user.register', LOWER(LTRIM(RTRIM(@username))));
+    COMMIT TRANSACTION;
+    SELECT @user_id AS user_id;
+END TRY
+BEGIN CATCH
+    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+    THROW;
+END CATCH;
+\end{lstlisting}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.75\textwidth]{orbit_register.png}
+\caption{Trang tự đăng ký: chỉ tạo được tài khoản bạn đọc}
+\label{fig:orbit_register}
+\end{figure}
+
+\subsection{Quản trị và đánh giá}
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.9\textwidth]{app_users.png}
@@ -819,16 +955,8 @@ hiển thị thông báo tương ứng.
 
 \begin{figure}[H]
 \centering
-\begin{subfigure}{0.48\textwidth}
-\includegraphics[width=\textwidth]{app_login.png}
-\caption{Đăng nhập}
-\end{subfigure}
-\hfill
-\begin{subfigure}{0.48\textwidth}
-\includegraphics[width=\textwidth]{app_eval.png}
-\caption{Kết quả đánh giá (đọc từ \texttt{v\_eval\_summary})}
-\end{subfigure}
-\caption{Trang đăng nhập và trang đánh giá}
+\includegraphics[width=0.9\textwidth]{app_eval.png}
+\caption{Trang kết quả đánh giá, đọc từ \texttt{v\_eval\_summary}}
 \label{fig:app_misc}
 \end{figure}
 
@@ -903,11 +1031,11 @@ Tối thiểu 6 bảng chính & 30 bảng, trong đó 22 bảng không phải nh
 Đủ PK, FK, UNIQUE, NOT NULL, DEFAULT, CHECK, đặt tên rõ & 30 PK, 37 FK, 13 UQ, 24 CK, 24 DF, 109 cột NOT NULL (Bảng~\ref{tab:constraint_counts}) \\
 30--200 bản ghi để kiểm thử & Dữ liệu thật L23: 5.913 khung hình, 3.976 OCR, 1.238 ASR, 120 yêu cầu khai thác; danh mục minh hoạ: 5 đơn vị, 5 bộ sưu tập, 21 chủ đề, 30 giấy phép \\
 Ít nhất 10 truy vấn (JOIN, GROUP BY / HAVING, subquery, UNION / INTERSECT / EXCEPT, LIKE, BETWEEN, TOP / PERCENT) & 25 truy vấn trong \texttt{10\_queries.sql} (Bảng~\ref{tab:queries}), gồm cả INNER, LEFT, RIGHT, FULL JOIN, CTE đệ quy, PIVOT, ROLLUP \\
-Tối thiểu 3 stored procedure (có IN/OUT) & 9 thủ tục, \texttt{sp\_progress\_report} có 3 tham số OUTPUT \\
+Tối thiểu 3 stored procedure (có IN/OUT) & 10 thủ tục, \texttt{sp\_progress\_report} có 3 tham số OUTPUT \\
 Tối thiểu 2 function & 5 hàm: 3 hàm vô hướng và 2 hàm bảng (một hàm đệ quy), đều được dùng trong truy vấn hoặc thủ tục \\
 Tối thiểu 3 view, dùng WITH CHECK OPTION nếu cần & 11 view, \texttt{v\_active\_users} có \texttt{WITH CHECK OPTION} \\
 ERD, chuẩn hoá 3NF có nêu các bước & Hình~\ref{fig:erd_catalog}--\ref{fig:erd_logs}, Bảng~\ref{tab:normalization} \\
-Kiểm tra vi phạm ràng buộc, giao dịch & \texttt{11\_tests.sql}, mục~\ref{sec:tests}; 64 kiểm thử pytest \\
+Kiểm tra vi phạm ràng buộc, giao dịch & \texttt{11\_tests.sql}, mục~\ref{sec:tests}; 67 kiểm thử pytest \\
 Chỉ mục cho cột truy vấn thường xuyên & Bảng~\ref{tab:indexes} và~\ref{tab:index_test} \\
 README hướng dẫn chạy & \texttt{README.md}, Phụ lục A \\
 \end{longtable}

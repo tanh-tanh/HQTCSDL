@@ -51,6 +51,8 @@ Phần lớn logic được đặt ngay trong SQL Server để vận dụng các
 \section{Quy trình nghiệp vụ}
 
 \begin{enumerate}
+    \item \textbf{Đăng ký}: khách xem được trang mở đầu và tự tạo tài khoản bạn đọc; tài
+    khoản cán bộ thư viện do quản trị viên cấp.
     \item \textbf{Biên mục}: đơn vị đóng góp bộ sưu tập; video được ghi nhan đề, gắn chủ đề
     và số hoá (khung hình, OCR, ASR). Trong đề tài, khâu số hoá được xem là đã có sẵn.
     \item \textbf{Tra cứu}: bạn đọc nhập mô tả; hệ thống đối chiếu với hình ảnh, chữ trên màn
@@ -104,9 +106,9 @@ lưu trữ, và chính cơ sở dữ liệu kiểm tra lại quyền cùng trạ
         font=\small, minimum height=1cm, inner sep=5pt},
     db/.style={box, fill=orange!10, draw=orange!70!black},
     arrow/.style={-{Stealth[length=2.5mm]}, thick}]
-\node[box, text width=2.1cm] (browser) {Trình duyệt\\(bạn đọc, cán bộ)};
+\node[box, text width=2.3cm] (browser) {Trình duyệt\\\footnotesize giao diện 3D (Three.js) và trang HTML};
 \node[box, right=1.3cm of browser, text width=4.0cm] (app) {Ứng dụng web FastAPI\\
-    \footnotesize đăng nhập, kiểm tra quyền,\\ \footnotesize hạ quyền bằng \mbox{\texttt{EXECUTE AS}}};
+    \footnotesize trang HTML, API JSON \texttt{/api/search},\\ \footnotesize đăng nhập, kiểm tra quyền,\\ \footnotesize hạ quyền bằng \mbox{\texttt{EXECUTE AS}}};
 \node[db, right=1.3cm of app, text width=4.4cm] (sql) {\textbf{SQL Server Express}\\
     \footnotesize danh mục, kho video, chỉ mục ngược,\\
     \footnotesize yêu cầu, giấy phép, hàm, thủ tục,\\
@@ -132,11 +134,15 @@ Các chức năng chính:
     theo nhánh chủ đề.
     \item \textbf{Tra cứu theo mô tả}, gộp ba nguồn bằng chứng: hình ảnh (vector SigLIP2),
     chữ trên hình (OCR) và lời nói (ASR). Việc tách từ, tra chỉ mục ngược, tính điểm và gộp
-    xếp hạng đều do thủ tục \texttt{sp\_search\_footage} thực hiện.
+    xếp hạng đều do thủ tục \texttt{sp\_search\_footage} thực hiện. Kết quả lọc được theo chủ
+    đề (gồm cả chủ đề con) và theo bộ sưu tập.
+    \item \textbf{Giao diện lưu trữ 3D}: cùng một kết quả tìm kiếm được trình bày theo ba
+    cách (vòng tròn, hành lang, đám mây ảnh); dạng danh sách truyền thống vẫn được giữ.
     \item \textbf{Yêu cầu khai thác và giấy phép}: gửi yêu cầu, chọn đoạn tư liệu, cấp phép
     hoặc từ chối, theo dõi hiệu lực giấy phép; bạn đọc chỉ thấy yêu cầu của mình.
-    \item \textbf{Tài khoản và phân quyền}: tạo tài khoản (kèm đơn vị, đối tượng), gán vai
-    trò, khoá tài khoản, đặt lại mật khẩu; mọi thay đổi được ghi nhật ký.
+    \item \textbf{Tài khoản và phân quyền}: khách tự đăng ký tài khoản bạn đọc; quản trị viên
+    tạo tài khoản (kèm đơn vị, đối tượng), gán vai trò, khoá tài khoản, đặt lại mật khẩu; mọi
+    thay đổi được ghi nhật ký.
     \item \textbf{Đo chất lượng tìm kiếm}: chạy toàn bộ yêu cầu mẫu đã xác minh, lưu kết quả
     và tính Recall@K, MRR, độ trễ bằng view.
 \end{itemize}
@@ -147,6 +153,8 @@ Hệ thống phân quyền theo vai trò (RBAC). Quyền được gán cho vai t
 người dùng; một người có thể có nhiều vai trò (Bảng~\ref{tab:roles}). Vai trò quyết định
 người dùng \textit{được làm gì}; còn đối tượng bạn đọc (nhà báo, nhà nghiên cứu, sinh viên)
 và đơn vị công tác là thông tin thống kê và được ghi vào giấy phép, không cấp thêm quyền.
+Tài khoản tự đăng ký luôn chỉ có vai trò \texttt{reader}; muốn trở thành cán bộ thư viện phải
+được quản trị viên gán vai trò.
 
 \begin{table}[H]
 \centering
