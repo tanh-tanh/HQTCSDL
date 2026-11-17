@@ -117,7 +117,7 @@ def test_admin_manages_users(client, users):
     other = TestClient(client.app)
     login(other, "reader1")
     client.post(f"/admin/users/{users['reader1']}", data={"roles": ["reader"]})
-    assert other.get("/", follow_redirects=False).status_code == 303
+    assert other.get("/requests", follow_redirects=False).status_code == 303
 
 
 def test_short_password_is_refused(client, users):
@@ -130,7 +130,7 @@ def test_short_password_is_refused(client, users):
 def test_logout_ends_the_session(client, users):
     login(client, "reader1")
     client.post("/logout")
-    assert client.get("/", follow_redirects=False).status_code == 303
+    assert client.get("/requests", follow_redirects=False).status_code == 303
 
 
 
@@ -183,3 +183,47 @@ def test_librarian_grants_a_licence(client, users):
     assert "q-1" in page.text and "Đã cấp phép" in page.text and "q-2" not in page.text
     # The frame page no longer offers the approved request.
     assert 'value="q-1"' not in client.get("/frames/4").text
+
+
+def _csrf(client):
+    import re
+
+    page = client.get("/register")
+    assert page.status_code == 200
+    return re.search(r'name="csrf_token" value="([^"]+)"', page.text).group(1)
+
+
+def _register(client, token, **extra):
+    data = {"username": "Tu.DangKy ", "password": "password123", "password_confirm": "password123",
+            "full_name": "Bạn đọc mới", "user_type": "student", "csrf_token": token, **extra}
+    return client.post("/register", data=data, follow_redirects=False)
+
+
+def test_self_registration_creates_a_plain_reader(client, db):
+    # "staff" is not offered publicly: it falls back to "other"; the role is always reader.
+    response = _register(client, _csrf(client), user_type="staff")
+    assert response.status_code == 303 and "archive_session=" in response.headers["set-cookie"]
+    with transaction(db, admin=True) as connection:
+        row = query_one(connection, "SELECT roles, organization, user_type FROM dbo.v_user_overview "
+                                    "WHERE username = 'tu.dangky'")
+        audit = query_one(connection, "SELECT COUNT(*) AS n FROM dbo.audit_log WHERE action = 'user.register'")
+    assert row == {"roles": "reader", "organization": None, "user_type": "other"}
+    assert audit["n"] == 1
+    assert client.get("/requests").status_code == 200
+    assert client.get("/admin/users").status_code == 403
+
+
+def test_self_registration_checks_csrf_and_duplicates(client, users):
+    assert _register(client, "forged").status_code == 400
+    token = _csrf(client)
+    assert _register(client, token, username="reader1").status_code == 409
+    assert _register(client, token, password_confirm="different1").status_code == 400
+
+
+def test_self_registration_can_be_turned_off(db, tmp_path):
+    from dataclasses import replace
+
+    settings = replace(db, keyframes_dir=tmp_path, self_registration=False)
+    with TestClient(create_app(settings, visual=FakeVisual([]))) as closed:
+        assert closed.get("/register", follow_redirects=False).status_code in (303, 404)
+        assert _register(closed, "x").status_code == 404

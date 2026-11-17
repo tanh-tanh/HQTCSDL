@@ -13,7 +13,7 @@ CHECK    -> lỗi 547: The UPDATE statement conflicted with the CHECK constraint
 VIEW CHECK OPTION -> lỗi 550: The attempted insert or update failed because the target view either specifies WITH CHECK OPTION or spans a view that specifies WITH CHECK OPTION and one or more rows resulting from the operation did not qualify under the CHECK OPTION constraint.
 username|full_name|is_active|created_at
 --------|---------|---------|----------
-default_demo||1|2026-10-12 21:20:35
+default_demo||1|2026-11-17 09:24:49
 DEFAULT  -> full_name = N'', is_active = 1, created_at = SYSDATETIME() (đã rollback)
 == B. Giao dịch ==
 B1. Trong giao dịch: 61 đoạn đã chọn
@@ -22,17 +22,17 @@ B2. sp_create_user lỗi 50002: Vai trò không tồn tại.
 B2. Số tài khoản atomic_demo: 0
 user_id
 -------
-9
+14
 username|roles
 --------|-----
 tx_demo|librarian, reader
 B3. Sau ROLLBACK, số tài khoản tx_demo: 0
 license_id
 ----------
-31
+32
 request_id|status|valid_from|valid_to
 ----------|------|----------|--------
-YC-003|approved|2026-10-12|2027-01-10
+YC-003|approved|2026-11-17|2027-02-15
 B4. Sau ROLLBACK, YC-003 trở lại trạng thái pending, số giấy phép: 0
 B5. sp_grant_license YC-004 -> lỗi 50006: Chưa chọn đoạn tư liệu nào cho yêu cầu.
 B5. YC-004 vẫn pending, số giấy phép: 0
@@ -47,18 +47,27 @@ C2. archive_app UPDATE requests -> lỗi 229: The UPDATE permission was denied o
 C3. bandoc1 sp_add_selection -> lỗi 50001: Không có quyền selection.write.
 C3. bandoc1 sp_grant_license -> lỗi 50001: Không có quyền license.grant.
 C4. thuthu1 sp_add_selection YC-001 (approved) -> lỗi 50005: Yêu cầu đã được xử lý, không sửa danh sách đoạn tư liệu.
+user_id
+-------
+15
+username|roles|organization|user_type
+--------|-----|------------|---------
+tudangky_demo|reader|NULL|student
+C5. Sau ROLLBACK, số tài khoản tudangky_demo: 0
+C5. sp_register_reader mật khẩu chưa băm -> lỗi 50007: Mật khẩu phải được băm bằng scrypt.
+C5. archive_app INSERT users -> lỗi 229: The INSERT permission was denied on the object 'users', database 'video_archive', schema 'dbo'.
 == D. Chỉ mục ==
 D1a. Qua chỉ mục ngược terms/ocr_postings:
 frames
 ------
 237
-Table 'ocr_postings'. Scan count 1, logical reads 2, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
-Table 'terms'. Scan count 0, logical reads 2, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'ocr_postings'. Scan count 1, logical reads 2, physical reads 2, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'terms'. Scan count 0, logical reads 2, physical reads 2, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
 D1b. LIKE quét toàn bảng:
 frames
 ------
 442
-Table 'ocr_texts'. Scan count 1, logical reads 43, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'ocr_texts'. Scan count 1, logical reads 43, physical reads 1, page server reads 0, read-ahead reads 41, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
 D2a. Dùng chỉ mục (video_id, pts_time):
 keyframe_id|pts_time
 -----------|--------
@@ -68,7 +77,7 @@ D2b. Bọc cột trong hàm, phải quét bảng:
 keyframe_id|pts_time
 -----------|--------
 65450|98.680
-Table 'keyframes'. Scan count 1, logical reads 26, physical reads 0, page server reads 0, read-ahead reads 0, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
+Table 'keyframes'. Scan count 1, logical reads 26, physical reads 0, page server reads 0, read-ahead reads 22, page server read-ahead reads 0, lob logical reads 0, lob physical reads 0, lob page server reads 0, lob read-ahead reads 0, lob page server read-ahead reads 0.
 table_name|index_name|type_desc|is_unique|is_primary_key
 ----------|----------|---------|---------|--------------
 asr_postings|PK_asr_postings|CLUSTERED|1|1
