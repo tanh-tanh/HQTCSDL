@@ -752,6 +752,7 @@ GO
 --   sp_grant_license       duyệt yêu cầu và cấp giấy phép trong một giao dịch
 --   sp_reject_request      từ chối yêu cầu
 --   sp_create_user         tạo tài khoản + vai trò trong một giao dịch
+--   sp_register_reader     bạn đọc tự đăng ký (chỉ vai trò reader)
 --   sp_progress_report     báo cáo tiến độ, trả kết quả qua tham số OUTPUT
 --
 -- Người đang thao tác được ứng dụng đặt bằng
@@ -1055,6 +1056,48 @@ BEGIN
 END;
 GO
 
+-- Tự đăng ký tài khoản bạn đọc (trang /register).  Không cần người thao tác
+-- trong ngữ cảnh phiên, nên quyền được khoá cứng ngay trong thủ tục: chỉ vai
+-- trò 'reader', không gắn đơn vị, không bao giờ là cán bộ ('staff').  Ứng
+-- dụng chỉ được EXECUTE thủ tục này, không có INSERT trên users/user_roles.
+CREATE OR ALTER PROCEDURE dbo.sp_register_reader
+    @username      VARCHAR(32),
+    @password_hash VARCHAR(255),
+    @full_name     NVARCHAR(100) = N'',
+    @user_type     VARCHAR(16)   = 'other'
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+    IF @user_type IS NULL OR @user_type NOT IN ('journalist', 'researcher', 'student', 'other')
+        SET @user_type = 'other';
+    IF @password_hash IS NULL OR @password_hash NOT LIKE 'scrypt$%'
+        THROW 50007, N'Mật khẩu phải được băm bằng scrypt.', 1;
+
+    DECLARE @name VARCHAR(32) = LOWER(LTRIM(RTRIM(@username)));
+    BEGIN TRY
+        BEGIN TRANSACTION;
+            INSERT INTO dbo.users (username, full_name, password_hash, organization_id, user_type)
+            VALUES (@name, COALESCE(LTRIM(RTRIM(@full_name)), N''), @password_hash, NULL, @user_type);
+            DECLARE @user_id INT = SCOPE_IDENTITY();
+
+            INSERT INTO dbo.user_roles (user_id, role_id)
+            SELECT @user_id, role_id FROM dbo.roles WHERE role_name = 'reader';
+            IF @@ROWCOUNT <> 1
+                THROW 50002, N'Thiếu vai trò reader.', 1;
+
+            INSERT INTO dbo.audit_log (user_id, action, detail)
+            VALUES (@user_id, 'user.register', @name);
+        COMMIT TRANSACTION;
+        SELECT @user_id AS user_id;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        THROW;
+    END CATCH;
+END;
+GO
+
 -- Báo cáo tiến độ: số yêu cầu, số yêu cầu đã có đoạn tư liệu được chọn và tỉ
 -- lệ qua tham số OUTPUT, kèm bảng chi tiết theo nguồn yêu cầu và trạng thái.
 CREATE OR ALTER PROCEDURE dbo.sp_progress_report
@@ -1330,6 +1373,7 @@ GRANT EXECUTE ON OBJECT::dbo.sp_remove_selection TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.sp_grant_license    TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.sp_reject_request   TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.sp_create_user   TO archive_writer;
+GRANT EXECUTE ON OBJECT::dbo.sp_register_reader TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.fn_has_permission TO archive_writer;
 GO
 

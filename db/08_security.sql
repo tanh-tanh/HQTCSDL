@@ -46,6 +46,7 @@ GRANT EXECUTE ON OBJECT::dbo.sp_remove_selection TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.sp_grant_license    TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.sp_reject_request   TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.sp_create_user   TO archive_writer;
+GRANT EXECUTE ON OBJECT::dbo.sp_register_reader TO archive_writer;
 GRANT EXECUTE ON OBJECT::dbo.fn_has_permission TO archive_writer;
 GO
 
