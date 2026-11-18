@@ -36,7 +36,7 @@ VIEW CHECK OPTION -> lỗi 550: The attempted insert or update failed because th
     CHECK OPTION constraint.
 username|full_name|is_active|created_at
 --------|---------|---------|----------
-default_demo||1|2026-11-17 09:24:49
+default_demo||1|2026-10-12 21:20:35
 DEFAULT  -> full_name = N'', is_active = 1, created_at = SYSDATETIME() (đã rollback)
 == B. Giao dịch ==
 B1. Trong giao dịch: 61 đoạn đã chọn
@@ -45,17 +45,17 @@ B2. sp_create_user lỗi 50002: Vai trò không tồn tại.
 B2. Số tài khoản atomic_demo: 0
 user_id
 -------
-14
+9
 username|roles
 --------|-----
 tx_demo|librarian, reader
 B3. Sau ROLLBACK, số tài khoản tx_demo: 0
 license_id
 ----------
-32
+31
 request_id|status|valid_from|valid_to
 ----------|------|----------|--------
-YC-003|approved|2026-11-17|2027-02-15
+YC-003|approved|2026-10-12|2027-01-10
 B4. Sau ROLLBACK, YC-003 trở lại trạng thái pending, số giấy phép: 0
 B5. sp_grant_license YC-004 -> lỗi 50006: Chưa chọn đoạn tư liệu nào cho yêu cầu.
 B5. YC-004 vẫn pending, số giấy phép: 0
@@ -77,14 +77,3 @@ C3. bandoc1 sp_add_selection -> lỗi 50001: Không có quyền selection.write.
 C3. bandoc1 sp_grant_license -> lỗi 50001: Không có quyền license.grant.
 C4. thuthu1 sp_add_selection YC-001 (approved) -> lỗi 50005: Yêu cầu đã được xử lý,
     không sửa danh sách đoạn tư liệu.
-user_id
--------
-15
-username|roles|organization|user_type
---------|-----|------------|---------
-tudangky_demo|reader|NULL|student
-C5. Sau ROLLBACK, số tài khoản tudangky_demo: 0
-C5. sp_register_reader mật khẩu chưa băm -> lỗi 50007: Mật khẩu phải được băm bằng
-    scrypt.
-C5. archive_app INSERT users -> lỗi 229: The INSERT permission was denied on the
-    object 'users', database 'video_archive', schema 'dbo'.

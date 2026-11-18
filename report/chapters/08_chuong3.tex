@@ -725,11 +725,6 @@ DEFAULT & Thêm tài khoản chỉ có tên và mật khẩu & \texttt{full\_nam
     lỗi 50001 (thiếu quyền \texttt{selection.write}, \texttt{license.grant}).
     \item \textbf{C4.} Ngay cả cán bộ thư viện \texttt{thuthu1} cũng không thêm được đoạn tư liệu
     vào YC-001 vì yêu cầu này đã được cấp phép: lỗi 50005.
-    \item \textbf{C5. Tự đăng ký.} Với quyền \texttt{archive\_app}, gọi
-    \texttt{sp\_register\_reader} cho \texttt{'TuDangKy\_Demo '} với đối tượng sinh viên trong một
-    giao dịch: tài khoản được chuẩn hoá thành \texttt{tudangky\_demo}, chỉ có vai trò
-    \texttt{reader}, không có đơn vị; sau \texttt{ROLLBACK} không còn tài khoản nào. Gọi với mật
-    khẩu chưa băm bị từ chối (lỗi 50007); chèn thẳng vào \texttt{users} bị từ chối (lỗi 229).
 \end{itemize}
 
 \subsection{Hiệu quả của chỉ mục}

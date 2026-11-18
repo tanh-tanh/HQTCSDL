@@ -234,33 +234,6 @@ BEGIN CATCH PRINT CONCAT(N'C4. thuthu1 sp_add_selection YC-001 (approved) -> l�
 EXEC sp_set_session_context @key = N'app_user_id', @value = NULL;
 GO
 
--- C5. Tự đăng ký (trang /register): ứng dụng chỉ gọi được sp_register_reader,
---     thủ tục luôn cấp đúng vai trò reader, không gắn đơn vị.  Chạy trong giao
---     dịch rồi ROLLBACK để không để lại tài khoản.
-BEGIN TRANSACTION;
-    EXECUTE AS USER = 'archive_app';
-    EXEC dbo.sp_register_reader @username = 'TuDangKy_Demo ', @password_hash = 'scrypt$demo',
-                                @full_name = N'Bạn đọc tự đăng ký', @user_type = 'student';
-    REVERT;
-    SELECT username, roles, organization, user_type FROM dbo.v_user_overview
-    WHERE username = 'tudangky_demo';
-ROLLBACK TRANSACTION;
-DECLARE @registered INT = (SELECT COUNT(*) FROM dbo.users WHERE username = 'tudangky_demo');
-PRINT CONCAT(N'C5. Sau ROLLBACK, số tài khoản tudangky_demo: ', @registered);
-GO
-
-EXECUTE AS USER = 'archive_app';
-BEGIN TRY  -- mật khẩu chưa băm scrypt bị từ chối ngay trong CSDL
-    EXEC dbo.sp_register_reader @username = 'plain_demo', @password_hash = 'matkhau123';
-END TRY
-BEGIN CATCH PRINT CONCAT(N'C5. sp_register_reader mật khẩu chưa băm -> lỗi ', ERROR_NUMBER(), N': ', ERROR_MESSAGE()); END CATCH;
-BEGIN TRY  -- tạo tài khoản chỉ qua thủ tục, không chèn thẳng vào users
-    INSERT INTO dbo.users (username, password_hash) VALUES ('direct_demo', 'scrypt$x');
-END TRY
-BEGIN CATCH PRINT CONCAT(N'C5. archive_app INSERT users -> lỗi ', ERROR_NUMBER(), N': ', ERROR_MESSAGE()); END CATCH;
-REVERT;
-GO
-
 -- ---------------------------------------------------------------------
 -- D. Chỉ mục: so sánh số trang đọc (logical reads)
 -- ---------------------------------------------------------------------
